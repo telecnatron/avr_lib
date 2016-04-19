@@ -21,6 +21,7 @@
  */
 
 #include "config.h"
+#include "lib/util/io.h"
 
 #ifndef LED_DEFS
 #warning Using default config. (Suitable for ProMini board LED on pin B5.)

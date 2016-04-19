@@ -14,7 +14,7 @@
  */
 
 // -------------------------------------------------------------
-// atmega xx8
+// atmega xx8 ...
 #if defined(ATMEGA328) || defined(ATMEGA168) || defined(ATMEGA88)
 
 // enable/disable INT0 interrupt.
@@ -38,8 +38,11 @@
 #define INT0_SENSE_FALL() EICRA |=  _BV(ISC01); EICRA &=~ _BV(ISC00)
 // trigger on rising edge
 #define INT0_SENSE_RISE() EICRA |=  _BV(ISC01)  | _BV(ISC00)
+
+// read state of int0 pin
+#define INT0_READ() (PIND & _BV(PIN2))
 // -------------------------------------------------------------
-// other processors
+// ... other processors
 #else
 #error "INT0 is not defined for this processor."
 #endif
