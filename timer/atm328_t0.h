@@ -1,5 +1,5 @@
-#ifndef ATM8_T0_H
-#define ATM8_T0_H
+#ifndef ATM328_T0_H
+#define ATM328_T0_H
 // -----------------------------------------------------------------------------
 // Copyright Stebbing Computing. 2013.
 // $Id: atm328_t0.h 427 2016-04-07 04:21:09Z steves $
@@ -30,7 +30,8 @@
 #define T0_OC0A_PWMF_SET()    t0_ctl.tccr0a |=  (_BV(COM0A1) | _BV(COM0A0))
 
 // Phase Correct PWM Mode
-// XXX goes here
+// Set when down-counting, clear when up-counting
+#define T0_OC0A_PWMPC_CLEAR() T0_OC0A_PWMF_CLEAR()  
 
 // Output B
 // Non-PWM modes:
@@ -54,16 +55,17 @@
 #define T0_OC0B_PWMF_SET()    t0_ctl.tccr0a |=  (_BV(COM0B1) | _BV(COM0B0))
 
 // Phase Correct PWM Mode
-// XXX goes here
+// Set when down-counting, clear when up-counting
+#define T0_OC0B_PWMPC_CLEAR()  T0_OC0B_PWMF_CLEAR() 
 
 // -----------------------------------------------------------------------------
 // Waveform generation
 // normal mode. OCRx updated immediately, TOV set at top, top=0xff
 #define T0_WGM_NORMAL() t0_ctl.tccr0a &=~ (_BV(WGM01) | _BV(WGM00) ); t0_ctl.tccr0b &=~ (_BV(WGM02))
 // PWM phase correct. OCRx set at top, TOV set at bottom, top=0xff
-#define T0_WGM_PWMPC() t0_ctl.tccr0a = ( t0_ctl.tccr0a &= _BV(WGM01)) | _BV(WGM00)  ); t0_ctl.tccr0b &=~ (_BV(WGM02))
+#define T0_WGM_PWMPC() t0_ctl.tccr0a = (( t0_ctl.tccr0a &= _BV(WGM01)) | _BV(WGM00)  ); t0_ctl.tccr0b &=~ (_BV(WGM02))
 // CTC mode. OCR set immediately, TOV set at MAX, top = OCRA
-#define T0_WGM_CTC()  (t0_ctl.tccr0a = ( t0_ctl.tccr0a &= _BV(WGM00)) | _BV(WGM01)  ); t0_ctl.tccr0b &=~ (_BV(WGM02))
+#define T0_WGM_CTC()  (t0_ctl.tccr0a = (( t0_ctl.tccr0a &= _BV(WGM00)) | _BV(WGM01)  ); t0_ctl.tccr0b &=~ (_BV(WGM02))
 // PWM fast
 #define T0_WGM_PWMF() t0_ctl.tccr0a |= ( _BV(WGM00) | _BV(WGM01)  ); t0_ctl.tccr0b &=~ (_BV(WGM02))
 
