@@ -5,6 +5,8 @@
 // $Id: atm328_t2.h 427 2016-04-07 04:21:09Z steves $
 // Control of atmega328 timer 2.
 // -----------------------------------------------------------------------------
+#include <stdint.h>
+#include <avr/io.h>
 
 // Compare match behaviour:
 
