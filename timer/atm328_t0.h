@@ -130,7 +130,7 @@ typedef struct {
 }t0_ctl_t;
 
 // global control structure
-static volatile t0_ctl_t t0_ctl;
+volatile t0_ctl_t t0_ctl;
 
 
 #endif
