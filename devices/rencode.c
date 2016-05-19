@@ -76,7 +76,7 @@ inline void re_isr_handler()
     re_prev <<=2;  
     // append current value to last 2 lsbits
     re_prev |= re_read();
-    // lookup up increment vale in state table
+    // lookup up increment value in state table
     re_value += pgm_read_byte(&(re_states[( re_prev & 0x0f )]));
 
     if(re_value > 3){
