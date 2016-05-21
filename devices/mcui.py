@@ -10,20 +10,28 @@ import sys
 
 # Globals
 error_detected = 0
-# track which buttons have been assigned
-assigned_buttons=[]
-assigned_re=[]
-assigned_leds=[]
+# Keep track how many of the various device types have been initialised
+re_count = 0
+pb_count = 0
+led_count = 0
 # PCINT ISRs (ie 0,1,2) from which the mcui_re_isr() function needs to be called.
 re_isr_vect=[0,0,0]
 
+
 # Functions
+
+def print_error(msg, line):
+    print '\n#error "At line {} of input: {}"\n'.format(str(line),str(msg))
+    sys.stderr.write("Error at line {} of input: ".format(str(line))+str(msg)+'\n');
+    error_detected=1;
+
 
 def print_suffix():
     print 
     print '''
 #endif // ifdef MCUI_DEFS
 '''.strip()
+
 
 def print_prefix():
     print '''
@@ -38,6 +46,7 @@ def print_prefix():
 // -----------------------------------------------------------------------------
 
 '''.strip();
+
 
 def pin2pc(port, pin):
     # map PortPin to PCINT number (which corresponds to PCMSKx, PCIEx, and PCINx_vect ISR)
@@ -69,13 +78,152 @@ def pin2pc(port, pin):
     pp=str(port)+str(pin);
     return pin2pc_tab[pp]
 
-def print_re_isr():
+
+def do_switch(name, port, pin, index):
+    """ """
+    info=pin2pc(port,pin)
+    pcint=info[0];
+    pcmsk='PCMSK'+str(info[1]);
+    pcie='PCIE'+str(info[1]);
+    portin='PIN'+str(port);
+    ddr="DDR"+str(port)
+    pin = "PIN"+str(pin)
+    pout="PORT"+str(port)
+    print "// {}{}: {}, {}, {}, {}, {}, {}".format(name, index, pout, pin, ddr, portin, pcint, pcmsk)
+    print "// Init pin: set as input, enable pull-up, set mask to enable pcint on this pin, enable interrupt"
+    print '#define MCUI_INIT_{}_{}() {} &= ~_BV({}); {} |= _BV({}); {} |= _BV({}); PCICR |= _BV({})'.format(name, str(index), ddr, pin, pout, pin, pcmsk, pcint, pcie)
+    print "// Read pin. Returns 0 if not asserted, non-zero if asserted. Physical pin is active low."
+    print '#define MCUI_READ_{}_{}()  (!({} & _BV({})))'.format(name, str(index), portin, pin)
+    print 
+
+
+def do_re(port, pin):
+    """ """
+    global re_count
+    do_switch('RE', port, pin, re_count)
+    # keep track of rotary encoder switches so ISR macros can be generated later by print_re_isr()
+    info=pin2pc(port,pin)
+    re_isr_vect[int(info[1])]=1
+    re_count+=1;
+
+
+def do_button(port, pin):
+    """ """
+    global pb_count
+    do_switch('PB', port, pin, pb_count)
+    pb_count+=1
+
+
+def do_led(port, pin, anode=1):
+    """ """
+    global led_count
+    ddr="DDR"+str(port)
+    pout="PORT"+str(port)
+    pin = "PIN"+str(pin);
+    portin = "PIN"+str(port)
+    con = 'cathode'
+    if anode:
+        con='anode'
+    # init
+    print "// LED{}: {}, {}, {}, pin is connected to LED {}".format(led_count, pout, pin, ddr, con)
+    print "// set as output and turn off"
+    if anode:
+        print "#define MCUI_INIT_LED_{}() {} |= _BV({}); {} &= ~_BV({}) ".format(led_count, ddr, pin, pout, pin)
+    else:
+        print "#define MCUI_INIT_LED_{}() {} |= _BV({}); {} |= _BV({}) ".format(led_count, ddr, pin, pout, pin)
+    # toggle
+    print "// toggle led"
+    print "#define MCUI_TOGGLE_LED_{}()  ({} ^= _BV({}))".format(led_count, pout, pin)
+    # on
+    print "// turn led on"
+    if anode:
+        print "#define MCUI_ON_LED_{}()   ({} |= _BV({}))".format(led_count, pout, pin)
+    else:
+        print "#define MCUI_ON_LED_{}()   ({} &= ~_BV({}))".format(led_count, pout, pin)
+    # off
+    print "// turn led off"
+    if anode:
+        print "#define MCUI_OFF_LED_{}()  ({} &= ~BV({}))".format(led_count, pout, pin)
+    else:
+        print "#define MCUI_OFF_LED_{}()  ({} |= _BV({}))".format(led_count, pout, pin)
+    # read
+    print "// get led state: 0 off, non-zero on"
+    if anode:
+        print "#define MCUI_READ_LED_{}()  ( {} & _BV({}) )".format(led_count, portin, pin)        
+    else:
+        print "#define MCUI_READ_LED_{}()  ( ~{} & _BV({}) )".format(led_count, portin, pin)
     print
+    led_count+=1;
+
+
+
+def do_pb_master():
+    """Generate init and read macros for buttons"""
+
+    global pb_count
+
+    # init
+    print "// Initialise push buttons"
+    sys.stdout.write('#define MCUI_INIT_PB() ')
+    for b in range(pb_count):
+        sys.stdout.write(" \\\n    MCUI_INIT_PB_{}()".format(b))
+        if b < pb_count-1:
+            sys.stdout.write(';');
+    print
+
+    # read
+    print "\n// Read push buttons into passed uint8_t"
+    sys.stdout.write('#define MCUI_READ_PB(b) ')
+    for b in range(pb_count):
+        sys.stdout.write(' \\\n    if(MCUI_READ_PB_{}()) b |= _BV({}); else b &= ~_BV({})'.format(b,b,b)) 
+        if b < pb_count-1:
+            sys.stdout.write(';');
+    print
+
+def do_re_master():
+    """Generate init and read macros for rotary encoder"""
+
+    global re_count
+
+    # init
+    print "// Initialise rotary encoder"
+    sys.stdout.write('#define MCUI_INIT_RE() ')
+    for  b in range(re_count):
+        sys.stdout.write(" \\\n    MCUI_INIT_RE_{}() ".format(b))
+        if b < re_count-1:
+            sys.stdout.write(';');
+    print
+
+
+def do_led_master():
+    """Generate init, read and write macros for LEDs"""
+
+    global led_count
+
+    #init 
+    print "// Initialise LEDs"
+    sys.stdout.write('#define MCUI_INIT_LED() ')
+    for  b in range(led_count):
+        sys.stdout.write(" \\\n    MCUI_INIT_LED_{}() ".format(b))
+        if b < led_count-1:
+            sys.stdout.write(';');
+    print 
+    print "\n// Write LEDs"
+    sys.stdout.write('#define MCUI_WRITE_LED(b) ')
+    for b in range(led_count):
+        sys.stdout.write('\\\n    if( b & _BV({})  ) MCUI_ON_LED_{}(); else MCUI_OFF_LED_{}()'.format(b,b,b));
+        if b < led_count-1:
+            sys.stdout.write(';');
+    print
+
+
+def do_pcint():
+    """Generate pcint ISR macros"""
     print '''
 // Macros for rotary encoder PCINT ISRs. These should be called from the 
 // corresponing ISR, eg: ISR(PCINT2_vect){ MCUI_RE_PCINT2_vect();}
-'''.strip();
-
+    '''.strip();
+    global re_isr_vect
     for i in range(0,3):
         sys.stdout.write("#define MCUI_RE_PCINT{}_vect()".format(i))
         if(re_isr_vect[i]==1):
@@ -84,202 +232,100 @@ def print_re_isr():
     print
 
 
-def print_error(msg, line):
-    print '\n#error at line {} of input: {}\n'.format(str(line),str(msg))
-    sys.stderr.write("Error at line {} of input: ".format(str(line))+str(msg));
-    error_detected=1;
-
-
-def do_button(type, device, port, pin):
-    """ """
-    info=pin2pc(port,pin)
-
-    # keep track of rotary encoder switches so ISR macros can be generated later by print_re_isr()
-    if (type == 'Rotary encoder'):
-        re_isr_vect[int(info[1])]=1
-
-    pcint=info[0];
-    pcmsk='PCMSK'+str(info[1]);
-    pcie='PCIE'+str(info[1]);
-    portin='PIN'+str(port);
-
-    ddr="DDR"+str(port)
-    pin = "PIN"+str(pin)
-    pout="PORT"+str(port)
-    print "\n// {} button ".format(type), device, ", ", pout, pin, pcint, pcmsk, pcie
-    print "// Init pin: set as input, enable pull-up, set mask to enable pcint on this pin, enable interrupt"
-    print '#define MCUI_INIT_{}() {} &= ~_BV({}); {} |= _BV({}); {} |= _BV({}); PCICR |= _BV({})'.format(str(device), ddr, pin, pout, pin, pcmsk, pcint, pcie)
-    print "// Read pin. Returns 0 if not asserted, non-zero if asserted. Physical pin is active low."
-    print '#define MCUI_READ_{}()  (!({} & _BV({})))'.format(str(device), portin, pin)
-
-
-def do_led(device, port, pin, anode):
-    """ """
-    assigned_leds.append(device)
-    print "\n// {} PORT{} PIN{}".format(device, port, pin)
-    print '#define MCUI_{}_INIT() (DDR{} |= _BV(PIN{}))'.format(device, port, pin) 
-    print '#define MCUI_{}_TOGGLE() (PORT{} ^= _BV(PIN{}))'.format(device, port, pin)
-    if(anode == 'A'):
-        print '#define MCUI_{}_ON()  (PORT{} |= _BV(PIN{}) )'.format(device, port, pin)
-        print '#define MCUI_{}_OFF() (PORT{} &= ~_BV(PIN{}) )'.format(device, port, pin)
-    else:
-        print '#define MCUI_{}_ON()  (PORT{} &= ~_BV(PIN{}) )'.format(device, port, pin)
-        print '#define MCUI_{}_OFF() (PORT{} |= _BV(PIN{}) )'.format(device, port, pin)
-
-
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
 
     # keep count of the number of buttons that are defined
-    num_buttons=0;
+    num_buttons=0
+    # keep count of the number of LEDs that are defined
+    num_leds=0
 
     try:
         reader = csv.reader(sys.stdin)
         line=0;
         print_prefix()
+
+        print "// Macros for individual RE, PB, and LED pins."
+        print "// -----------------------------------------------------------------------------"
         for row in reader:
-            # eg row: ['LED_R', ' B1']
-            line += 1;
+            
+            # count input lines
+            line += 1
 
-            # skip comments and blank lines
-            if len(row) == 0:
-                continue
-            if row[0][0] == '#':
-                continue;
-           
-            device = row[0]
-            pin = '';
-            port = '';
-            if( len(row) > 1 and row[1] != ''):
-                row[1]= row[1].strip();
-                port = row[1][0];
-                pin = row[1][1];
-            else:
+            # skip blanks, comments
+            if len(row) == 0 or row[0].strip() == '' or row[0].strip()[0]=='#':
                 continue;
 
-            ( devtype, index ) = tuple(filter(None, device.split("_") ))
-        
-#            print "line: ", line, ", device: ", device, ", pin: ",pin, ", port: ", port, ", devtype: ", devtype, ", index: ", index
+            if len(row) < 2:
+                print_error("CSV record must have at least 2 fields", line)
 
-            if(devtype == 'RE'):
-                do_button('Rotary encoder',device, port, pin);
-#                print "#define RE_READ_{}() MCUI_READ_RE_{}()".format(pin, pin)
-                assigned_re.append(int(index))
-            elif( devtype == 'PB'):
-                do_button('Push',device, port, pin);
-                assigned_buttons.append(int(index))
-                num_buttons += 1;
-            elif(devtype == 'LED'):
-                if(len(row) > 2 ):
-                    anode=row[2].strip();
-                if(anode == ''):
-                    anode='A';
-                do_led(device, port, pin, anode);
-            else:
-                print_error("Invalid device type specified: "+str(device),line);
+            #print "row: "+str(row)
+            #print len(row)
+            
+            # Figure out port/pin and verify that it is valid
+            # eg PB
+            device_type = row[0].strip().upper()
+            # port_pin eg B1
+            pp = row[1].strip().upper()
+            # split into port and pin
+            if len(pp) != 2:
+                print_error("Invalid port_pin in field 2", line);
+            port = pp[0]
+            pin = pp[1]
+            if port != 'B' and port != 'C' and port != 'D':
+                print_error("Invalid port in field 2: "+str(port), line);
+            if pin not in '01234567':
+                print_error("Invalid pin in field 2: '{}'. Must be in range 0-7".format((pin)), line);
 
+            # process according to device type
+            if device_type == 'RE':
+                # rotary encoder switch
+                do_re(port, pin)
+            elif device_type == 'PB':
+                # push button
+                do_button(port, pin)
+            elif device_type == 'LED':
+                # LED
+                # optional third field should be 'A' or 'C'
+                anode=1 # default: mcu pins are connected to LED anodes
+                if len(row)>2:
+                    a=row[2].strip().upper()
+                    if a=='A':
+                        anode = 1
+                    elif a=='C':
+                        anode=0
+                    else:
+                        print_error("Invalid 'anode' value in field 3: Must be either 'A' or 'C'")
+                
+                do_led(port, pin, anode)
 
-        # Generate init and read macros for buttons
-        print "\n// Initialise push buttons"
-        sys.stdout.write('#define MCUI_INIT_PB() ')
-        if( len(assigned_buttons)):
-            count = 0;
-            for  b in assigned_buttons:
-                sys.stdout.write(" \\\n    MCUI_INIT_PB_{}()".format(b))
-                if count < len(assigned_buttons)-1:
-                   sys.stdout.write(';');
-                count += 1;
-        print 
+        print "// -----------------------------------------------------------------------------"
+        # master pb macros
+        do_pb_master()
+        print "\n// -----------------------------------------------------------------------------"
+        # master re init
+        do_re_master()
+        print "\n// -----------------------------------------------------------------------------"
+        # master led init
+        do_led_master()
+        print "\n// -----------------------------------------------------------------------------"
+        # pcint macros
+        do_pcint()
+        print "\n// -----------------------------------------------------------------------------"
+        # nums
+        print "// total number of push buttons"
+        print "#define MCUI_NUM_PB {}".format(pb_count)
+        print "// total number of LEDs"
+        print "#define MCUI_NUM_LED {}".format(led_count)
 
-        print "\n// Read push buttons"
-        sys.stdout.write('#define MCUI_READ_PB(b) ')
-        count = 0
-        for b in assigned_buttons:
-            sys.stdout.write(' \\\n    if(MCUI_READ_PB_{}()) b |= _BV({}); else b &= ~_BV({})'.format(b,b,b)) 
-            if count < len(assigned_buttons)-1:
-                sys.stdout.write(';');
-            count += 1;
-        print
+        print_suffix()
 
-        # Generate init and read macros for rotary encoder
-        print "\n// Initialise rotary encoder buttons"
-        sys.stdout.write('#define MCUI_INIT_RE() ')
-        if( len(assigned_re)):
-            count = 0;
-            for  b in assigned_re:
-                sys.stdout.write(" \\\n    MCUI_INIT_RE_{}() ".format(b))
-                if count < len(assigned_re)-1:
-                   sys.stdout.write(';');
-                count += 1;
-            print 
-
-
-        # Generate master macros for LEDs
-        # init
-        print "\n// Initialise LED(s)"
-        sys.stdout.write('#define MCUI_LED_INIT() ');
-        if( len(assigned_leds) ):
-            count = 0;
-            for b in assigned_leds:
-                sys.stdout.write(" \\\nMCUI_{}_INIT() ".format(b))
-                if count < len(assigned_leds)-1:
-                   sys.stdout.write(';');
-                count += 1;
-        # on
-        print "\n// Turn LED(s) on.";
-        sys.stdout.write('#define MCUI_LED_ON() ');
-        if( len(assigned_leds) ):
-            count = 0;
-            for b in assigned_leds:
-                sys.stdout.write(" \\\nMCUI_{}_ON() ".format(b))
-                if count < len(assigned_leds)-1:
-                   sys.stdout.write(';');
-                count += 1;
-        print
-        #off
-        print "\n// Turn LED(s) off.";
-        sys.stdout.write('#define MCUI_LED_OFF() ');
-        if( len(assigned_leds) ):
-            count = 0;
-            for b in assigned_leds:
-                sys.stdout.write(" \\\nMCUI_{}_OFF() ".format(b))
-                if count < len(assigned_leds)-1:
-                   sys.stdout.write(';');
-                count += 1;
-        print
-        # toggle
-        print "\n// Toggle LED(s).";
-        sys.stdout.write('#define MCUI_LED_TOGGLE() ');
-        if( len(assigned_leds) ):
-            count = 0;
-            for b in assigned_leds:
-                sys.stdout.write(" \\\nMCUI_{}_TOGGLE() ".format(b))
-                if count < len(assigned_leds)-1:
-                   sys.stdout.write(';');
-                count += 1;
-        print
-
-
-
-        # Master init
-        print "\n// Master init - initialises all buttons including re"
-        print "#define MCUI_INIT() MCUI_INIT_RE(); MCUI_INIT_PB()"
-
-        print "\n// Number of push buttons that are in use"
-        print "#define MCUI_NUM_BTNS "+str(num_buttons)
-
-        print_re_isr();
-        print_suffix();
-
-        
     except:
-        print_error("Error detected",line)
+        print_error("Error detected", line)
         raise
 
-    if(error_detected):
-        sys.stdout.write("Errors were detected")
-
-
-            
+    finally:
+        if(error_detected):
+            sys.stdout.write("Errors were detected")
 
 

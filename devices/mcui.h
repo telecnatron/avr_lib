@@ -22,8 +22,6 @@
 #define MCUI_PB3  3
 #define MCUI_PB4  4
 #define MCUI_PB5  5
-#define MCUI_RE0  6
-#define MCUI_RE1  7
 
 #define MCUI_ASSERTED_PB0(byte) (byte & _BV(MCUI_PB0))
 #define MCUI_ASSERTED_PB1(byte) (byte & _BV(MCUI_PB1))
@@ -31,16 +29,16 @@
 #define MCUI_ASSERTED_PB3(byte) (byte & _BV(MCUI_PB3))
 #define MCUI_ASSERTED_PB4(byte) (byte & _BV(MCUI_PB4))
 #define MCUI_ASSERTED_PB5(byte) (byte & _BV(MCUI_PB5))
-#define MCUI_ASSERTED_RE0(byte) (byte & _BV(MCUI_RE0))
-#define MCUI_ASSERTED_RE1(byte) (byte & _BV(MCUI_RE1))
 
-
-// maximum number of ticks between button being down and then up for it to be 
+// maximum number of ticks between button being down-and-then-up for it to be 
 // considered as a click.
 #define MCUI_CLICK_TICKS 750
 
 //!
 void mcui_init(void (*changed_fn), void (*click_fn), void(*re_fn));
+
+//! Returns current tick count
+uint16_t mcui_get_ticks();
 
 //!
 void mcui_tick();

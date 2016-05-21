@@ -15,7 +15,7 @@ static uint8_t mcui_btn_prev_state;
 //! ticker, used for timings, is incremented by call to mcui_tick
 uint16_t mcui_ticks;
 //! array of click-times. One for each button
-uint16_t mcui_btn_click_time[MCUI_NUM_BTNS];
+uint16_t mcui_btn_click_time[MCUI_NUM_PB];
 //! buttons click state: 0 indicates waiting for down, 1 indicates waiting for up.
 uint8_t mcui_btn_click_state;
 //! rotary encoder turns: -ve indicates CCW, +ve CW
@@ -28,10 +28,16 @@ void (*mcui_re_turned_handler)(int8_t dir);
 
 void mcui_init(void (*changed_fn), void (*click_fn), void(*re_fn))
 {
-    MCUI_INIT();
+    MCUI_INIT_PB();
+    MCUI_INIT_RE();
     mcui_click_handler = click_fn;
     mcui_changed_handler = changed_fn;
     mcui_re_turned_handler= re_fn;
+}
+
+inline uint16_t mcui_get_ticks()
+{
+    return mcui_ticks;
 }
 
 //! Reads the rotary encoder's pins, returns
@@ -40,31 +46,11 @@ void mcui_init(void (*changed_fn), void (*click_fn), void(*re_fn))
 //! eg 0x3 indicates that both pins are asserted.
 static inline uint8_t mcui_re_read()
 {
-
     return MCUI_READ_RE_0() | (MCUI_READ_RE_1() << 1);
-#if 0
-    if(RE_R & _BV(RE_PIN0)){
-	// pin 0 is high (ie not asserted)
-	if(RE_R & _BV(RE_PIN1)){
-	    // pin 1 is high
-	    return 0x0;
-	}else{
-	    return 0x2;
-	}
-    }else{
-	// pin 0 is low
-	if(RE_R & _BV(RE_PIN1)){
-	    // pin 1 is high
-	    return 0x1;
-	}else{
-	    // pin 1 is low
-	    return 0x3;
-	}
-    }
-#endif
 }
 
-//! ISR for reading RE. Should be called from the PCINTx_vect ISRs for the pins that RE is connected to.
+//! Rotary encoder state machine. Should be called from the PCINTx_vect ISRs for the pins that RE is connected to.
+//! See https://www.circuitsathome.com/mcu/rotary-encoder-interrupt-service-routine-for-avr-micros
 void mcui_re_isr()
 {
     // previous index into lookup table
@@ -102,7 +88,7 @@ inline uint8_t mcui_read_btns()
 inline void mcui_detect_click(uint8_t changed_flags, uint8_t btns)
 {
     // loop thru each button
-    for(uint8_t i=0; i < MCUI_NUM_BTNS; i++){
+    for(uint8_t i=0; i < MCUI_NUM_PB; i++){
 	if( changed_flags & _BV(i)){
 	    // button has changed
 	    if( !(mcui_btn_click_state & _BV(i)) ){
@@ -164,21 +150,23 @@ void mcui_tick()
     }
 }
 
-
 //  -----------------------------------------------------------------------------
-// PCINT ISR
+// Pin-change (PCINT) ISRs
 ISR(PCINT0_vect)
 {
+    // Handle rotary encoder state machine (if necessary)
     MCUI_RE_PCINT0_vect();
 }
 
 ISR(PCINT1_vect)
 {
+    // Handle rotary encoder state machine (if necessary)
     MCUI_RE_PCINT1_vect();
 }
 
 ISR(PCINT2_vect)
 {
+    // Handle rotary encoder state machine (if necessary)
     MCUI_RE_PCINT2_vect();
 }
 //  -----------------------------------------------------------------------------
