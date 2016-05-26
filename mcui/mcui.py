@@ -202,19 +202,27 @@ def do_led_master():
 
     #init 
     print "// Initialise LEDs"
-    sys.stdout.write('#define MCUI_INIT_LED() ')
+    sys.stdout.write('#define MCUI_INIT_LEDS() ')
     for  b in range(led_count):
         sys.stdout.write(" \\\n    MCUI_INIT_LED_{}() ".format(b))
         if b < led_count-1:
             sys.stdout.write(';');
     print 
     print "\n// Write LEDs"
-    sys.stdout.write('#define MCUI_WRITE_LED(b) ')
+    sys.stdout.write('#define MCUI_WRITE_LEDS(b) ')
     for b in range(led_count):
         sys.stdout.write('\\\n    if( b & _BV({})  ) MCUI_ON_LED_{}(); else MCUI_OFF_LED_{}()'.format(b,b,b));
         if b < led_count-1:
             sys.stdout.write(';');
     print
+    print "\n// Read LEDs"
+    sys.stdout.write('#define MCUI_READ_LEDS(b) ')
+    for b in range(led_count):
+        sys.stdout.write('\\\n    if(MCUI_READ_LED_{}()) b |= _BV({}); else b &= ~_BV({})'.format(b,b,b));
+        if b < led_count-1:
+            sys.stdout.write(';');
+    print
+
 
 
 def do_pcint():

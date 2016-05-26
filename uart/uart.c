@@ -21,6 +21,7 @@
 // Functions are defined in ../boot/boot_functions.c and not here.
 // -----------------------------------------------------------------------------------
 #else
+
 // We are running as bootloader or standalone application,
 // functions are defined here.
 
@@ -154,6 +155,6 @@ ISR(UART_RX_ISR)
 	UART.flags |= _BV(UART_FLAG_RX_BUFFER_FULL);
     }
 }
-#endif
+#endif // ifdef BOOT_APP
 
 

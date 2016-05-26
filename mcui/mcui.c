@@ -105,7 +105,8 @@ inline void mcui_detect_click(uint8_t changed_flags, uint8_t btns)
 		// check down time is less than max
 		if( (mcui_ticks - mcui_btn_click_time[i]) < MCUI_CLICK_TICKS){
 		    // call click handler
-		    mcui_click_handler(i);
+		    if(mcui_click_handler)
+			mcui_click_handler(i);
 		}
 		// clear bit to indicate that now looking for down
 		mcui_btn_click_state &= ~_BV(i);
@@ -145,7 +146,8 @@ void mcui_tick()
 
     // handle rotary encoder turns
     if(mcui_re_turns){
-	mcui_re_turned_handler(mcui_re_turns);
+	if(mcui_re_turned_handler)
+	    mcui_re_turned_handler(mcui_re_turns);
 	mcui_re_turns=0;
     }
 }

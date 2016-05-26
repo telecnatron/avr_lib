@@ -34,7 +34,7 @@
 //! this is default value.
 #ifndef BAUD
 #define BAUD 19200
-#warning "BAUD is not defined, using default."
+#warning "BAUD is not defined, using default "$(BAUD)
 #endif
 
 //! uart control structure.
