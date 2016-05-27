@@ -1,21 +1,31 @@
 // -----------------------------------------------------------------------------
 // Copyright Stephen Stebbing 2016. http://telecnatron.com/
 // -----------------------------------------------------------------------------
+/**
+ * @file   mcui_led.c
+ * @author Stephen Stebbing <steves@slap.ss.com>
+ * @date   Fri May 27 12:57:29 2016
+ * 
+ * @brief  Microcontroller Common User Interface LED control
+ * 
+ * 
+ */
+
 #include "mcui_led.h"
 
 
 //! LED control structure
 typedef struct {
-    // brightness: range 0 to MCUI_LED_PWM_NUM_BITS-1. 0 being always off, MCUI_LED_PWM_NUM_BITS-1 being always on
+    //! brightness: range 0 to MCUI_LED_PWM_NUM_BITS-1. 0 being always off, MCUI_LED_PWM_NUM_BITS-1 being always on
     uint8_t brightness;
-    // blinky variables:
-    // total number of ticks in one cycle
+    //! blinky variables:
+    //! total number of ticks in one cycle
     uint16_t ticks_max;
-    // tick count at which led is turned off
+    //! tick count at which led is turned off
     uint16_t ticks_off;
-    // current tick count
+    //! current tick count
     uint16_t ticks;
-    // number of repeat-cycles remaining
+    //! number of repeat-cycles remaining
     uint8_t cycles;
 } mcui_led_ctrl_t;
 
