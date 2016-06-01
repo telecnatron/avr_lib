@@ -29,6 +29,24 @@
 #define MCUI_LED_PWM_NUM_BITS 10
 #define MCUI_LED_BRIGHTNESS_MAX MCUI_LED_PWM_NUM_BITS - 1
 
+//! LED control structure
+typedef struct {
+    //! brightness: range 0 to MCUI_LED_PWM_NUM_BITS-1. 0 being always off, MCUI_LED_PWM_NUM_BITS-1 being always on
+    uint8_t brightness;
+    //! blinky variables:
+    //! total number of ticks in one cycle
+    uint16_t ticks_max;
+    //! tick count at which led is turned off
+    uint16_t ticks_off;
+    //! current tick count
+    uint16_t ticks;
+    //! number of repeat-cycles remaining
+    uint8_t cycles;
+} mcui_led_ctrl_t;
+
+//! Global array of control structures, 1 for each LED
+extern mcui_led_ctrl_t mcui_led_ctrl[MCUI_NUM_LED];
+
 //! Initialise LED pins and turn LEDs off.
 void mcui_led_init();
 
@@ -85,6 +103,20 @@ void mcui_led_inc_brightness(uint8_t led, int8_t inc);
  * @param cycles The number of times that the blinking will repeat. Use 0 for infinite.
  */
 void mcui_led_set_blinky(uint8_t led, uint16_t ticks_on, uint16_t ticks_off, uint8_t cycles);
+
+
+//!
+void mcui_led_set_brightness(uint8_t led, uint8_t brightness);
+//!
+uint8_t mcui_led_get_brightness(uint8_t led);
+//!
+void mcui_led_set_period(uint8_t led, uint16_t period_ticks);
+//!
+uint16_t mcui_led_get_period(uint8_t led);
+//!
+void mcui_led_set_duty_cycle(uint8_t led, uint16_t duty_cycle_ticks);
+//!
+uint16_t mcui_led_get_duty_cycle(uint8_t led);
 
 #endif /* _MCUI_LED_H */
 

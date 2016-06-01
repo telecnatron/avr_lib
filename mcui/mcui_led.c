@@ -13,22 +13,6 @@
 
 #include "mcui_led.h"
 
-
-//! LED control structure
-typedef struct {
-    //! brightness: range 0 to MCUI_LED_PWM_NUM_BITS-1. 0 being always off, MCUI_LED_PWM_NUM_BITS-1 being always on
-    uint8_t brightness;
-    //! blinky variables:
-    //! total number of ticks in one cycle
-    uint16_t ticks_max;
-    //! tick count at which led is turned off
-    uint16_t ticks_off;
-    //! current tick count
-    uint16_t ticks;
-    //! number of repeat-cycles remaining
-    uint8_t cycles;
-} mcui_led_ctrl_t;
-
 //! array of control structures, 1 for each LED
 mcui_led_ctrl_t mcui_led_ctrl[MCUI_NUM_LED];
 
@@ -65,11 +49,6 @@ inline void mcui_led_disable(uint8_t led)
 inline void mcui_led_toggle(uint8_t led)
 {
     mcui_led_mask_enable ^= _BV(led);
-}
-
-inline void mcui_led_set_brightness(uint8_t led, uint8_t bright)
-{
-    mcui_led_ctrl[led].brightness = bright;
 }
 
 void mcui_led_inc_brightness(uint8_t led, int8_t inc)
@@ -162,4 +141,33 @@ void mcui_led_tick()
    
 }
 
+inline void mcui_led_set_brightness(uint8_t led, uint8_t bright)
+{
+    mcui_led_ctrl[led].brightness = bright;
+}
+
+inline uint8_t mcui_led_get_brightness(uint8_t led)
+{
+    return mcui_led_ctrl[led].brightness;
+}
+
+inline void mcui_led_set_period(uint8_t led, uint16_t period_ticks)
+{
+    mcui_led_ctrl[led].ticks_max = period_ticks;
+}
+
+inline uint16_t mcui_led_get_period(uint8_t led)
+{
+    return mcui_led_ctrl[led].ticks_max;
+}
+
+inline void mcui_led_set_duty_cycle(uint8_t led, uint16_t duty_cycle_ticks)
+{
+    mcui_led_ctrl[led].ticks_off= duty_cycle_ticks;
+}
+
+inline uint16_t mcui_led_get_duty_cycle(uint8_t led)
+{
+    return mcui_led_ctrl[led].ticks_off;
+}
 
