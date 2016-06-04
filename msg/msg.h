@@ -2,15 +2,15 @@
 #define MSG_H
 // -----------------------------------------------------------------------------
 // Copyright Stephen Stebbing 2015. http://telecnatron.com/
-// $Id: msg.h 403 2015-12-27 03:11:36Z steves $
+// $Id: $
 // -----------------------------------------------------------------------------
 /**
  * @file   msg.h
  * @author Stephen Stebbing
  * @date   Mon Dec 21 12:39:24 2015
  * 
- * @brief  A very simple messaging system for sending and receiving messages via
- * the UART, for example. 
+ * @brief  A very simple messaging system for sending and receiving messages, via
+ * the UART for example. 
  * 
  * When present in the bootloader section, these functions can be called from
  * the application section. To enable this functionallity, ensure that BOOT_APP 
