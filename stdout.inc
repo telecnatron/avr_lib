@@ -17,6 +17,7 @@
  */
 
 #include <stdio.h>
+#include "./uart/uart.h"
 
 #define STDOUT_INIT() (stdout=&stdoutput)
 
