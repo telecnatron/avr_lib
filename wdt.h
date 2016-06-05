@@ -23,7 +23,7 @@
 #include <avr/wdt.h>
 
 #ifdef ATMEGA8
-#error "Watchdog timer interrupt is not available on atmega8"
+#warning "Watchdog timer interrupt is not available on atmega8"
 #endif
 
 //! Enable wdt with interrupt on timeout, and without system reset
@@ -59,6 +59,17 @@
 			   "r" ((uint8_t) (0x00)) \
         : "r0"  \
     )
+
+//! Reset the processor
+#define WDT_RESET()  wdt_enable(WDTO_15MS) ; while(1){}
+
+
+// Disable wdt in case is was enable prior to software reset
+// Function needs to be added to the .init3 section (i.e. during the startup code, before main()) 
+// to disable the watchdog early enough so it does not continually reset the AVR.
+// See http://www.atmel.com/webdoc/AVRLibcReferenceManual/FAQ_1faq_softreset.html
+void wdt_init() __attribute__((naked)) __attribute__((section(".init3")));
+
 
 #endif //ifndef UTIL_WDT_H
 
