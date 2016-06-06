@@ -20,8 +20,6 @@ void *msg_handler_LEN(msg_t *msg, uint8_t byte);
 void *msg_handler_DATA(msg_t *msg, uint8_t byte);
 void *msg_handler_EOM(msg_t *msg, uint8_t byte);
 
-#define MSG_TIMEOUT_TICKS 8
-
 // convienience macros:
 // call function for current state
 #define MSG_CALL(event, byte)   msg_ctrl->state_fn=msg_ctrl->state_fn(&(msg_ctrl->msg), event, byte) 

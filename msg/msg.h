@@ -28,20 +28,27 @@
  * An invalid message can be caused by the end-of-message character not being received 
  * when expected, or by a timeout occuring before a completed message has being received.
  *
- * To provide for timing, the msg_tick() function should be called periodically, and when
- * used with MSG_TIMEOUT_TICKS (defined in msg.c) set the timout period. 
- * With MSG_TIMEOUT_TICKS=8 and calling msg_tick() every 250ms, the timeout value is 2 seconds.
+ * To provide for timing, the <b>msg_tick()</b> function should be called periodically, and when
+ * used with MSG_TIMEOUT_TICKS  set the timout period. 
+ * With MSG_TIMEOUT_TICKS=8 and calling <b>msg_tick()</b> every 250ms, the timeout value is 2 seconds.
  *
- * When a message is received, the user provided callback function is called to allow access to
- * the message. The callback function has the following signature:
+ * When a message is received, the user provided callback function is called which gives access to
+ * the message. The callback function has the following signature:<code>
  *
  *   void handler(struct msg_t *msg)
- *
- * And is passed a point to a msg_t structure. msg->buf contains the message data, and msg->len
+ *</code>
+ * and is passed a point to a msg_t structure. msg->buf contains the message data, and msg->len
  * is the message length.
  *
  */
 #include <stdint.h>
+#include "config.h"
+
+#ifndef MSG_DEFS
+#warning "Using default defs"
+//! Number of calls to msg_tick() with no message data received for the message to be considered as timed out.
+#define MSG_TIMEOUT_TICKS 8
+#endif
 
 //! Byte that is sent to indicate start of message
 #define MSG_SOM '~'
@@ -54,6 +61,8 @@
 // Convienience macros
 //! True if a completed message has been received
 #define MSG_IS_AVAIL(msg_ctrl_p) (msg_ctrl_p.msg.flags & _BV(MSG_FLAG_MSG_AVAIL))
+#define MSG_DATA(msgp) (msgp->buf)
+#define MSG_LEN(msgp) (msgp->len)
 
 //! buffer for holding the message data
 typedef struct msg_t {

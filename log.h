@@ -14,6 +14,7 @@
  * 
  */
 #include <stdint.h>
+#include <avr/pgmspace.h>
 
 // log levels
 #define LOG_LEVEL_DEBUG 0
