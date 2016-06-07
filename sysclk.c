@@ -8,8 +8,11 @@
 uint16_t sysclk_ticks;
 // seconds count
 uint16_t sysclk_seconds;
-// flag to indicated that clk has ticked since last call to clk_has_ticked()
+// flag to indicated that clk has ticked since last call to sysclk_has_ticked()
 uint8_t sysclk_ticked;
+// flag to indicated that seconds haveticked since last call to sysclk_have_seconds_ticked()
+uint8_t sysclk_seconds_ticked;
+
 
 void sysclk_init()
 {
@@ -56,6 +59,15 @@ inline uint8_t sysclk_has_ticked()
     return 0;
 }
 
+inline uint8_t sysclk_have_seconds_ticked()
+{
+    if( sysclk_seconds_ticked){
+	sysclk_seconds_ticked= 0;
+	return 1;
+    }
+    return 0;
+}
+
 inline uint16_t sysclk_get_seconds()
 {
     return sysclk_seconds;
@@ -67,13 +79,13 @@ inline void sysclk_reset_seconds()
 }
 
 
-
 ISR(SYSCLK_ISR_NAME)
 {
     sysclk_ticked=1;
     sysclk_ticks++;
     if( sysclk_ticks >=  SYSCLK_TICK_FREQ){
 	sysclk_seconds++;
+	sysclk_seconds_ticked = 1;
 	sysclk_ticks=0;
     }
 }

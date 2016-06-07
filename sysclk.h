@@ -51,6 +51,9 @@ uint8_t sysclk_has_ticked();
 uint16_t sysclk_get_seconds();
 
 //!
+uint8_t sysclk_have_seconds_ticked();
+
+//!
 void sysclk_reset_seconds();
 
 

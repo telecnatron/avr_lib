@@ -51,9 +51,9 @@
 #endif
 
 //! Byte that is sent to indicate start of message
-#define MSG_SOM '~'
+#define MSG_SOM '\x2'
 //! Byte that is sent to indicate end of message
-#define MSG_EOM '`'
+#define MSG_EOM '\x3'
 
 //! Bit defs for the msg_t flags field.
 #define MSG_FLAG_MSG_AVAIL 1
