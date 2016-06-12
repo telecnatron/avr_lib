@@ -16,16 +16,16 @@
  * the application section. To enable this functionallity, ensure that BOOT_APP 
  * is defined when compiling msg.c
  *
- * The message consists of:<UL>
+ * The message consists of bytes (uint8_t) being:<UL>
  *    <LI>Start of message byte (character) as defined by MSG_SOM</LI>
  *    <LI>Message length byte, max 256</LI>
  *    <LI>The message's data bytes</LI>
- *    <LI>End of message byte as defined by MSG_EOM</LI>
+ *    <LI>Checksum byte being the value that sums the len and data bytes to 0</LI>
  * </UL>
  * 
  * Invalid messages are silently ignored and the system will reset back to waiting
  * for a new message.
- * An invalid message can be caused by the end-of-message character not being received 
+ * An invalid message can be caused by the chend-of-message character not being received 
  * when expected, or by a timeout occuring before a completed message has being received.
  *
  * To provide for timing, the <b>msg_tick()</b> function should be called periodically, and when
@@ -37,9 +37,14 @@
  *
  *   void handler(struct msg_t *msg)
  *</code>
- * and is passed a point to a msg_t structure. msg->buf contains the message data, and msg->len
- * is the message length.
+ * It is passed a pointer to a msg_t structure. msg->data contains the message data bytes, and msg->len
+ * is the message length byte.
  *
+ * The <code>msg_rx_char()</code> function is used by the application to pass a received byte from the HOST
+ * (eg via UART) into the msg system.
+ *
+ * The msg_send() function is used to send a message back to the HOST. It is passed a pointer to a function
+ * that does the actual sending.
  */
 #include <stdint.h>
 #include "config.h"
@@ -52,29 +57,25 @@
 
 //! Byte that is sent to indicate start of message
 #define MSG_SOM '\x2'
-//! Byte that is sent to indicate end of message
-#define MSG_EOM '\x3'
-
-//! Bit defs for the msg_t flags field.
-#define MSG_FLAG_MSG_AVAIL 1
 
 // Convienience macros
-//! True if a completed message has been received
-#define MSG_IS_AVAIL(msg_ctrl_p) (msg_ctrl_p.msg.flags & _BV(MSG_FLAG_MSG_AVAIL))
-#define MSG_DATA(msgp) (msgp->buf)
+#define MSG_DATA(msgp) (msgp->data)
 #define MSG_LEN(msgp) (msgp->len)
+
 
 //! buffer for holding the message data
 typedef struct msg_t {
-    uint8_t *buf;
-    uint8_t buf_size;
+    uint8_t *data;
+    //! maximum length of buffer that data points to
+    uint8_t data_max_len;
+    //! timing tick count
     uint8_t timer;
-    //! expected length of the message
+    //! expected length of the message being received.
     uint8_t len;
-    //! number of characters of the message read so far
+    //! number of characters read so far of the message being received.
     uint8_t count;
-    //
-    uint8_t flags;
+    //! check sum of received message's len and data bytes
+    uint8_t cs; 
     //! handler fn, gets call when message has been received
     void (*handler)(struct msg_t *msg);
 } msg_t;
@@ -82,6 +83,7 @@ typedef struct msg_t {
 // type for state function pointers
 typedef     void *(*state_fn_t)(msg_t *msg, uint8_t byte);
 
+//! Structure for controlling msg reception state machine
 typedef struct {
     state_fn_t state_fn;
     msg_t msg;
@@ -91,9 +93,9 @@ typedef struct {
 /** 
  * Initialise the messaging system.
  * 
- * @param msg_ctrl Pointer to the msg_ctrl_t structure that will be used to contain data required by the system
+ * @param msg_ctrl Pointer to the msg_ctrl_t structure that will be used to contain data required by the system.
  * This pointer will be passed to the other msg_xxx() functions
- * @param buf The buffer that will be used to hold the message data.
+ * @param buf The buffer that will be used to hold the message data that is received.
  * @param buf_size The size of the buffer in bytes, maximum is 256.
  * @param handler The callback function that will be called when a message has been successfully received.
  */
@@ -101,7 +103,7 @@ void msg_init(msg_ctrl_t *msg_ctrl, uint8_t *buf, uint8_t buf_size, void (*handl
 
 /** 
  * Pass a byte that has been received on the communication channel to the messaging system.
- * Eg this function would be called whenever a byte is received from the UART.
+ * Eg this function should be called whenever a byte is received from the PC.
  *
  * @param msg_ctrl Pointer to control structure.
  * @param byte The received byte.
@@ -119,12 +121,11 @@ void msg_send(uint8_t *msg_data, uint8_t len, void (*tx_byte_fn)(const char c));
 
 /** 
  * Function that should be called periodically to give the messaging system its timeout ability.
- * A timeout will occur after MSG_TIMEOUT_TICKS (defined in msg.c = 8 ticks), so this function
- * could be called a rate of 250ms for a one second timeout.
- * @param msg_ctrl  Pointer to control structure.
+ * A timeout will occur after MSG_TIMEOUT_TICKS ticks, so if this is set to 8, then this function
+ * should be called a rate of 250ms for a one second timeout.
+ * @param msg_ctrl  Pointer to msg control structure.
  */
 void msg_tick(msg_ctrl_t *msg_ctrl);
-
 
 #endif
 

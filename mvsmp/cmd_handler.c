@@ -33,31 +33,27 @@ msg_t cmd_handler_get_msg()
     return *cmd_handler_msg;
 }
 
-void cmd_handler_echo(void (*sender)(uint8_t *msg_data, uint8_t len))
-{
-    sender(cmd_handler_msg->buf, cmd_handler_msg->len);
-}
 
 void cmd_handler_handler(msg_t *msg)
 {
-
     if (MSG_LEN(msg)){
-	// first byte of msg data is index of the handler function
-	uint8_t i = MSG_DATA(msg)[0];
-#ifdef CMD_HANDLER_AUTO_RESET
-	if( i == 0){
+	// first byte of msg data is cmd  of the handler function
+	uint8_t cmd = MSG_DATA(msg)[0];
+	if( cmd == 0 && MSG_LEN(msg) == 1){
+	    LOG_INFO_FP(PSTR("Rebooting"),0);
 	    WDT_RESET();
 	    // XXX never gets to here
 	    return;
 	}
-#endif
+
 	// calculate index into cmd_handler_tab of this command
-	if (i < CMD_HANDLER_CMD_OFFSET){
+	if (cmd < CMD_HANDLER_CMD_OFFSET){
 	    // this is an invalid command number
-	    LOG_DEBUG_FP(PSTR("Invalid command number: %u"),i);
+	    LOG_DEBUG_FP(PSTR("Invalid command number: %u"),cmd);
 	    return;
 	}
-	i = i - CMD_HANDLER_CMD_OFFSET;
+	// index into cmd_handler_tab of this command-number
+	uint8_t i = cmd - CMD_HANDLER_CMD_OFFSET;
 	
 	if( i < cmd_handler_num_handlers ){
 	    cmd_handler_msg=msg;
@@ -65,7 +61,7 @@ void cmd_handler_handler(msg_t *msg)
 	    cmd_handler_t fn = *cmd_handler_tab[i];
 	    if(fn){
 		// call handler function
-		fn(i, MSG_LEN(msg)-1, &MSG_DATA(msg)[1] );
+		fn(cmd, MSG_LEN(msg)-1, &MSG_DATA(msg)[1] );
 	    }
 	}else{
 	    LOG_DEBUG_FP(PSTR("No such command number %u"),i);
