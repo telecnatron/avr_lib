@@ -31,7 +31,7 @@ typedef  void (*cmd_handler_t)(uint8_t msg_num, uint8_t len, uint8_t *data);
  */
 void cmd_handler_init(cmd_handler_t *cmd_tab, uint8_t num_handlers, void (*reboot_fn)());
 // convenience macro: automatically calculates the num_handlers
-#define CMD_HANDLER_INIT(msg_t, reboot_fn) cmd_handler_init(msg_t, sizeof(msg_t) / sizeof(cmd_handler_t), reboot_fn )
+#define CMD_HANDLER_INIT(msg_tab, reboot_fn) cmd_handler_init(msg_tab, sizeof(msg_tab) / sizeof(cmd_handler_t), reboot_fn )
 
 //!
 msg_t cmd_handler_get_msg();
