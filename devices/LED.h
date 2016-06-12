@@ -2,7 +2,7 @@
 #define LED_H
 // -----------------------------------------------------------------------------
 // Copyright Stephen Stebbing 2015. http://telecnatron.com/
-// $Id: LED.h 403 2015-12-27 03:11:36Z steves $
+// $Id: LED.h 385 2015-12-21 03:30:19Z steves $
 // -----------------------------------------------------------------------------
 /**
  * @file   LED.h
@@ -21,7 +21,6 @@
  */
 
 #include "config.h"
-#include "lib/util/io.h"
 
 #ifndef LED_DEFS
 #warning Using default config. (Suitable for ProMini board LED on pin B5.)
@@ -44,6 +43,7 @@
 #define LED_TOGGLE() PIN_TOGGLE(LED_W,LED_PIN)
 //! Initialise LED by setting LED pin as output
 #define LED_INIT() LED_CTL |= _BV(LED_PIN)
+#define LED_STATUS() (LED_R & _BV(LED_PIN))
 
 #endif
 
