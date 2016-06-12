@@ -12,9 +12,9 @@
 
 // log level strings
 const char log_level_debug[]  PROGMEM = "DEBUG";
-const char log_level_info[]  PROGMEM = "INFO";
-const char log_level_warn[]  PROGMEM = "WARN";
-const char log_level_error[] PROGMEM = "ERROR";
+const char log_level_info[]   PROGMEM = "INFO";
+const char log_level_warn[]   PROGMEM = "WARN";
+const char log_level_error[]  PROGMEM = "ERROR";
 
 // log level
 uint8_t log_level=LOG_LEVEL_INFO;

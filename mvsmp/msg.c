@@ -23,16 +23,18 @@ void *msg_handler_EOM(msg_t *msg,  uint8_t byte);
 #define MSG_CALL(event, byte)   msg_ctrl->state_fn=msg_ctrl->state_fn(&(msg_ctrl->msg), event, byte) 
 // (re)start timer
 #define MSG_TIMER_START()       msg_timer_set(msg, MSG_TIMEOUT_TICKS)
-#define MSG_CS(sum)             (256-sum)
+#define MSG_CS(sum)             (uint8_t)(256-sum)
 
 // test/debug
+// ------------------------
+// logging function for debugging
 #ifdef MSG_DEBUG
 #include <stdio.h>
-#define _MSG_LOG(fmt, msg...) printf(fmt, msg)
+#define MSG_LOG(fmt, msg...) printf(fmt, msg)
 #else
-#define _MSG_LOG(fmt, msg...)
+#define MSG_LOG(fmt, msg...)
 #endif
-
+// ------------------------
 
 void msg_init(msg_ctrl_t *msg_ctrl,  uint8_t *buf, uint8_t buf_size,  void (*handler)(msg_t *msg))
 {
@@ -46,7 +48,7 @@ void msg_init(msg_ctrl_t *msg_ctrl,  uint8_t *buf, uint8_t buf_size,  void (*han
 void msg_rx_byte(msg_ctrl_t *msg_ctrl, uint8_t byte)
 {
     // call state function: it returns pointer to the next state function
-    _MSG_LOG("rx: 0x%02x sf: %p, \n",byte, msg_ctrl->state_fn);
+    MSG_LOG("rx: 0x%02x sf: %p, \n",byte, msg_ctrl->state_fn);
     msg_ctrl->state_fn = msg_ctrl->state_fn(&(msg_ctrl->msg), byte) ;
     
 }
@@ -78,7 +80,7 @@ void msg_tick(msg_ctrl_t *msg_ctrl)
 	if(!msg_ctrl->msg.timer){
 	    // timer has expired.
 	    msg_ctrl->state_fn = (state_fn_t)msg_handler_SOM;
-	    _MSG_LOG("timeout%c",'\n');
+	    MSG_LOG("timeout%c",'\n');
 	}
     }
 }
@@ -134,7 +136,7 @@ void *msg_handler_EOM(msg_t *msg, uint8_t byte)
 	// call handler function
 	msg->handler(msg);
     }else{
-	_MSG_LOG("invalid checksum: got %u, expected %u\n",byte, MSG_CS(msg->cs));
+	MSG_LOG("invalid checksum: got %u, expected %u\n",byte, MSG_CS(msg->cs));
     }
     return (void *)msg_handler_SOM;
 }

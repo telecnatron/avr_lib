@@ -3,11 +3,6 @@
 // -----------------------------------------------------------------------------
 #include <stdint.h>
 #include "cmd_handler.h"
-#include "../log.h"
-
-#ifdef CMD_HANDLER_AUTO_RESET
-#include "../wdt.h"
-#endif
 
 // Globals
 //! table (array) of handler functions
@@ -16,16 +11,15 @@ static cmd_handler_t *cmd_handler_tab;
 static uint8_t cmd_handler_num_handlers;
 //! Pointer to the current msg
 static msg_t *cmd_handler_msg;
+//! Pointer to user provided reboot functions
+static void (*cmd_handler_reboot_fn)();
 
-// commands numbered 0-7 are reserved, in cmd_handler_handler() this value is subtracted from
-// the cmd number to arrive at the offset into the cmd_handler_tab table
-// for the received command
-#define CMD_HANDLER_CMD_OFFSET 8
 
-void cmd_handler_init(cmd_handler_t *msg_tab, uint8_t num_handlers)
+void cmd_handler_init(cmd_handler_t *cmd_tab, uint8_t num_handlers, void (*reboot_fn)())
 {
-    cmd_handler_tab = msg_tab;
+    cmd_handler_tab = cmd_tab;
     cmd_handler_num_handlers = num_handlers;
+    cmd_handler_reboot_fn = reboot_fn;
 }
 
 msg_t cmd_handler_get_msg()
@@ -39,32 +33,26 @@ void cmd_handler_handler(msg_t *msg)
     if (MSG_LEN(msg)){
 	// first byte of msg data is cmd  of the handler function
 	uint8_t cmd = MSG_DATA(msg)[0];
-	if( cmd == 0 && MSG_LEN(msg) == 1){
-	    LOG_INFO_FP(PSTR("Rebooting"),0);
-	    WDT_RESET();
+	
+	// check if this is reboot cmd
+	if( cmd == CMD_HANDLER_CMD_REBOOT && MSG_LEN(msg) == 1){
+	    // yup, call reboot function
+	    if(cmd_handler_reboot_fn)
+		cmd_handler_reboot_fn();
 	    // XXX never gets to here
 	    return;
 	}
 
-	// calculate index into cmd_handler_tab of this command
-	if (cmd < CMD_HANDLER_CMD_OFFSET){
-	    // this is an invalid command number
-	    LOG_DEBUG_FP(PSTR("Invalid command number: %u"),cmd);
-	    return;
-	}
-	// index into cmd_handler_tab of this command-number
-	uint8_t i = cmd - CMD_HANDLER_CMD_OFFSET;
-	
-	if( i < cmd_handler_num_handlers ){
+	if( cmd < cmd_handler_num_handlers ){
 	    cmd_handler_msg=msg;
 	    // call handler function corresponding to this index
-	    cmd_handler_t fn = *cmd_handler_tab[i];
+	    cmd_handler_t fn = *cmd_handler_tab[cmd];
 	    if(fn){
 		// call handler function
 		fn(cmd, MSG_LEN(msg)-1, &MSG_DATA(msg)[1] );
 	    }
 	}else{
-	    LOG_DEBUG_FP(PSTR("No such command number %u"),i);
+	    // no cmd with this cmd-number
 	}
     }
 }
