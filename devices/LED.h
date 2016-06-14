@@ -43,7 +43,7 @@
 #define LED_TOGGLE() PIN_TOGGLE(LED_W,LED_PIN)
 //! Initialise LED by setting LED pin as output
 #define LED_INIT() LED_CTL |= _BV(LED_PIN)
-#define LED_STATUS() (LED_R & _BV(LED_PIN))
+#define LED_STATUS() (LED_R & _BV(LED_PIN)) ? 1: 0
 
 #endif
 
