@@ -4,6 +4,18 @@
 #include <stdint.h>
 #include "cmd_handler.h"
 
+// ------------------------
+// logging 
+#ifdef F_CPU
+// this code used when running on mcu
+#include "../log.h"
+#else
+#define LOG_INFO_FP(fmt, msg)
+#define LOG_DEBUG_FP(fmt, msg)
+#endif
+// ------------------------
+
+
 // Globals
 //! table (array) of handler functions
 static cmd_handler_t *cmd_handler_tab;
@@ -15,7 +27,7 @@ static msg_t *cmd_handler_msg;
 static void (*cmd_handler_reboot_fn)();
 
 
-void cmd_handler_init(cmd_handler_t *cmd_tab, uint8_t num_handlers, void (*reboot_fn)())
+inline void cmd_handler_init(cmd_handler_t *cmd_tab, uint8_t num_handlers, void (*reboot_fn)())
 {
     cmd_handler_tab = cmd_tab;
     cmd_handler_num_handlers = num_handlers;
@@ -28,6 +40,11 @@ msg_t cmd_handler_get_msg()
 }
 
 
+inline void cmd_handler_echo(void (*sender)(uint8_t *msg_data, uint8_t len))
+{
+    sender(cmd_handler_msg->data, cmd_handler_msg->len);
+}
+
 void cmd_handler_handler(msg_t *msg)
 {
     if (MSG_LEN(msg)){
@@ -37,8 +54,10 @@ void cmd_handler_handler(msg_t *msg)
 	// check if this is reboot cmd
 	if( cmd == CMD_HANDLER_CMD_REBOOT && MSG_LEN(msg) == 1){
 	    // yup, call reboot function
-	    if(cmd_handler_reboot_fn)
+	    if(cmd_handler_reboot_fn){
+		LOG_INFO_FP("reset", 0);
 		cmd_handler_reboot_fn();
+	    }
 	    // XXX never gets to here
 	    return;
 	}
