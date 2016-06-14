@@ -3,7 +3,7 @@
 // -----------------------------------------------------------------------------
 #include "msg.h"
 #include <stddef.h>
-
+#include "../log.h"
 // -----------------------------------------------------------------------------------
 #ifdef BOOT_APP
 // We are running as an application that calls into the bootloaders code for uart functions.
@@ -25,14 +25,23 @@ void *msg_handler_EOM(msg_t *msg,  uint8_t byte);
 #define MSG_TIMER_START()       msg_timer_set(msg, MSG_TIMEOUT_TICKS)
 #define MSG_CS(sum)             (uint8_t)(256-sum)
 
-// test/debug
+
 // ------------------------
 // logging function for debugging
 #ifdef MSG_DEBUG
+// this used when this code is running on PC (for unit tests)
 #include <stdio.h>
 #define MSG_LOG(fmt, msg...) printf(fmt, msg)
 #else
 #define MSG_LOG(fmt, msg...)
+#endif
+
+#ifdef F_CPU
+// this code used when running on mcu
+#include "../log.h"
+#else
+#define LOG_INFO_FP(fmt, msg)
+#define LOG_DEBUG_FP(fmt, msg)
 #endif
 // ------------------------
 
@@ -48,7 +57,8 @@ void msg_init(msg_ctrl_t *msg_ctrl,  uint8_t *buf, uint8_t buf_size,  void (*han
 void msg_rx_byte(msg_ctrl_t *msg_ctrl, uint8_t byte)
 {
     // call state function: it returns pointer to the next state function
-    MSG_LOG("rx: 0x%02x sf: %p, \n",byte, msg_ctrl->state_fn);
+//    MSG_LOG("rx: 0x%02x sf: %p, \n",byte, msg_ctrl->state_fn);
+//    LOG_DEBUG_FP("rx: 0x%02x sf: %p, \n",byte, msg_ctrl->state_fn);
     msg_ctrl->state_fn = msg_ctrl->state_fn(&(msg_ctrl->msg), byte) ;
     
 }

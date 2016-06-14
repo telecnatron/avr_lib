@@ -15,8 +15,9 @@
 #include "./msg.h"
 
 //! Received msg with the cmd number will cause reboot_fn() to be called
-#define CMD_HANDLER_CMD_REBOOT 255
-
+#define CMD_HANDLER_CMD_REBOOT              255
+#define CMD_HANDLER_CMD_BOOTLOADER_STARTED  254
+#define CMD_HANDLER_CMD_APP_STARTED         253
 
 //! type for handler callback functions
 typedef  void (*cmd_handler_t)(uint8_t msg_num, uint8_t len, uint8_t *data);
@@ -36,8 +37,21 @@ void cmd_handler_init(cmd_handler_t *cmd_tab, uint8_t num_handlers, void (*reboo
 //!
 msg_t cmd_handler_get_msg();
 
-//!
+/** 
+ * Send most recently received message back to sender
+ * 
+ * @param sender Pointer to function used to send the message, eg msg_uart_send()
+ */
+void cmd_handler_echo(void (*sender)(uint8_t *msg_data, uint8_t len));
+
+
+/** 
+ * 
+ * 
+ * @param msg 
+ */
 void cmd_handler_handler(msg_t *msg);
+
 
 
 #endif /* _CMD_HANDLER_H */

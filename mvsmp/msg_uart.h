@@ -4,12 +4,12 @@
 // Copyright Stephen Stebbing 2016. http://telecnatron.com/
 // -----------------------------------------------------------------------------
 /**
- * @file   msg_uart.h
- * @author steves
- * @date   2016/06/12 14:42:59
+ * @file   msg_uart.c
+ * @author Stephen Stebbing <steves@slap.ss.com>
+ * @date   Mon Jun 13 16:21:37 2016
  * 
- * @brief  
- * 
+ * @brief  Wrapper for msg.c module. Uses uart to send and received msg bytes.
+ *
  */
 
 #include "config.h"
@@ -44,5 +44,12 @@ void msg_uart_poll();
  * @param len 
  */
 void msg_uart_send(uint8_t *datap, uint8_t len);
-#endif /* _MSG_UART_H */
 
+
+/** 
+ * 
+ * 
+ */
+void msg_uart_tick();
+
+#endif /* _MSG_UART_H */
