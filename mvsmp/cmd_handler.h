@@ -19,6 +19,7 @@
 #define CMD_HANDLER_CMD_BOOTLOADER_STARTED  254
 #define CMD_HANDLER_CMD_APP_STARTED         253
 
+
 //! type for handler callback functions
 typedef  void (*cmd_handler_t)(uint8_t msg_num, uint8_t len, uint8_t *data);
 
