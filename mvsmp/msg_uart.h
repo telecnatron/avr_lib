@@ -9,7 +9,6 @@
  * @date   Mon Jun 13 16:21:37 2016
  * 
  * @brief  Wrapper for msg.c module. Uses uart to send and received msg bytes.
- *
  */
 
 #include "config.h"
@@ -25,9 +24,10 @@
 
 
 /** 
- * 
- * 
- * @param handler_fn 
+ * Initialise the msg system to use the uart. Note that uart this function 
+ * does not initialise the uart.
+ * @param handler_fn Pointer to the callback function to be used by the message system
+ * on receipt of a message.
  */
 void msg_uart_init(void handler_fn(msg_t *msg));
 

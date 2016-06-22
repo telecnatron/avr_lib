@@ -70,7 +70,8 @@
 // See http://www.atmel.com/webdoc/AVRLibcReferenceManual/FAQ_1faq_softreset.html
 void wdt_init() __attribute__((naked)) __attribute__((section(".init3")));
 
-
+//! Reset the mcu via wdt timeout
+void wdt_reset_mcu();
 #endif //ifndef UTIL_WDT_H
 
 
