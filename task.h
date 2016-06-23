@@ -14,7 +14,7 @@
 
 
 //! id (index into TaskTable) of the task that is currently running,
-//! only valid whilst in task_run(), otherwise is id of last task to be run
+//! only valid whilst in task_run(), otherwise is id of task that was last run
 extern uint8_t task_running_id;
 
 /** 
@@ -68,6 +68,15 @@ void task_run();
  * @param task Pointer to the function that gets called when the task is run.
  */
 void task_init_task(uint8_t task_num, void (* task)());
+
+
+/** 
+ *  Initialise task and make it ready by means of calls to task_init_task()
+ *  and task_ready()
+ * @param task_num The task id (tid). This is index into task_table
+ * @param task Pointer to the function that gets called when the task is run.
+ */
+void task_init_ready(uint8_t task_num, void (* task)());
 
 /** 
  * Make task with passed id unrunnable for passed number of ticks,
