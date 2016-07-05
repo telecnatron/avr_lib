@@ -82,6 +82,12 @@ void task_init_task(uint8_t task_num, void (* task)())
     TaskTable[task_num].task = task;
 }
 
+void task_init_ready(uint8_t task_num, void (* task)())
+{
+    task_init_task(task_num, task);
+    task_ready(task_num);
+}
+
 void task_tick()
 {
     // loop thru task table decrementing tick counters 

@@ -28,6 +28,8 @@
 
 //! Output port to which LED is connected.
 #define LED_W    PORTB
+//! Input port to which LED is connected.
+#define LED_R    PINB
 //! Pin number of the port to which LED is connected.
 #define LED_PIN  PIN5
 //! DDR of the port to which LED is connected.
