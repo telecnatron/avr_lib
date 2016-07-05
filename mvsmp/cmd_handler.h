@@ -13,6 +13,7 @@
  */
 
 #include "./msg.h"
+#include <avr/pgmspace.h>
 
 //! Received msg with the cmd number will cause reboot_fn() to be called
 #define CMD_HANDLER_CMD_REBOOT              255
@@ -34,6 +35,20 @@ typedef  void (*cmd_handler_t)(uint8_t msg_num, uint8_t len, uint8_t *data);
 void cmd_handler_init(cmd_handler_t *cmd_tab, uint8_t num_handlers, void (*reboot_fn)());
 // convenience macro: automatically calculates the num_handlers
 #define CMD_HANDLER_INIT(msg_tab, reboot_fn) cmd_handler_init(msg_tab, sizeof(msg_tab) / sizeof(cmd_handler_t), reboot_fn )
+
+
+/** 
+ * Send a message with passed command numer.
+ * 
+ * @param cmd_num The command number.
+ * @param msg_data The data that is to be contained in the message. 
+ * @param len The length of the data.
+ * @param tx_byte_fn Function that is to be called to transmit a byte on the communication channel.
+ */
+void cmd_handler_send(uint8_t cmd_num, uint8_t *msg_data, uint8_t data_len, void (*tx_byte_fn)(const char b));
+
+//! Send a message that is contained in PROGMEM
+void cmd_handler_send_P(uint8_t cmd_num, uint8_t *msg_data_P, uint8_t data_len, void (*tx_byte_fn)(const char b));
 
 //!
 msg_t cmd_handler_get_msg();

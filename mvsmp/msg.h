@@ -61,6 +61,7 @@
 // Convienience macros
 #define MSG_DATA(msgp) (msgp->data)
 #define MSG_LEN(msgp) (msgp->len)
+#define MSG_CS(sum)             (uint8_t)(256-sum) 
 
 
 //! buffer for holding the message data

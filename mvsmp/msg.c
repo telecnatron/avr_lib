@@ -23,7 +23,6 @@ void *msg_handler_EOM(msg_t *msg,  uint8_t byte);
 #define MSG_CALL(event, byte)   msg_ctrl->state_fn=msg_ctrl->state_fn(&(msg_ctrl->msg), event, byte) 
 // (re)start timer
 #define MSG_TIMER_START()       msg_timer_set(msg, MSG_TIMEOUT_TICKS)
-#define MSG_CS(sum)             (uint8_t)(256-sum)
 
 
 // ------------------------

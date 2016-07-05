@@ -40,6 +40,53 @@ msg_t cmd_handler_get_msg()
 }
 
 
+void cmd_handler_send(uint8_t cmd_num, uint8_t *msg_data, uint8_t data_len, void (*tx_byte_fn)(const char b))
+{
+    // checksum 
+    uint8_t cs=data_len+1;
+    // send SOM
+    tx_byte_fn(MSG_SOM);
+    // send length, add 1 for cmd_num
+    tx_byte_fn(data_len+1);
+    // send cmd number
+    tx_byte_fn(cmd_num);
+    cs += cmd_num;
+    // send data
+    while(data_len--){
+	uint8_t b= *(msg_data);
+	cs += b;
+	tx_byte_fn(b);
+	msg_data++;
+    }
+    // send checksum
+    tx_byte_fn(MSG_CS(cs));
+}
+
+
+void cmd_handler_send_P(uint8_t cmd_num, uint8_t *msg_data_P, uint8_t data_len, void (*tx_byte_fn)(const char b))
+{
+    // checksum 
+    uint8_t cs=data_len+1;
+    // send SOM
+    tx_byte_fn(MSG_SOM);
+    // send length, add 1 for cmd_num
+    tx_byte_fn(data_len+1);
+    // send cmd number
+    tx_byte_fn(cmd_num);
+    cs += cmd_num;
+    // send data
+    while(data_len--){
+	uint8_t b= pgm_read_byte_near(msg_data_P);
+	cs += b;
+	tx_byte_fn(b);
+	msg_data_P++;
+    }
+    // send checksum
+    tx_byte_fn(MSG_CS(cs));
+}
+
+
+
 inline void cmd_handler_echo(void (*sender)(uint8_t *msg_data, uint8_t len))
 {
     sender(cmd_handler_msg->data, cmd_handler_msg->len);

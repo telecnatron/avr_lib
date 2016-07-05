@@ -49,6 +49,16 @@ void msg_uart_send(uint8_t *datap, uint8_t len);
 /** 
  * 
  * 
+ * @param cmd_num 
+ * @param msg_data 
+ * @param data_len 
+ */
+void msg_uart_send_cmd(uint8_t cmd_num, uint8_t *msg_data, uint8_t data_len);
+//! msg_data points to PROGMEM
+void msg_uart_send_cmd_P(uint8_t cmd_num, uint8_t *msg_data, uint8_t data_len);
+/** 
+ * 
+ * 
  */
 void msg_uart_tick();
 

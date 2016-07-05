@@ -29,6 +29,18 @@ inline void msg_uart_send(uint8_t *datap, uint8_t len)
     msg_send(datap, len, uart_putc);
 }
 
+
+void msg_uart_send_cmd(uint8_t cmd_num, uint8_t *msg_data, uint8_t data_len)
+{
+    cmd_handler_send(cmd_num, msg_data, data_len, uart_putc);
+}
+
+void msg_uart_send_cmd_P(uint8_t cmd_num, uint8_t *msg_data, uint8_t data_len)
+{
+    cmd_handler_send_P(cmd_num, msg_data, data_len, uart_putc);
+}
+
+
 inline void msg_uart_tick()
 {
     msg_tick(&msg_uart_ctrl);
