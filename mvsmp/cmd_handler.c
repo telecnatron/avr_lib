@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------
-// Copyright Stephen Stebbing 2016. http://telecnatron.com/
+// Copyright Stephen Stebbing 2015. See: http://telecnatron.com/articles/mvsmp/
 // -----------------------------------------------------------------------------
 #include <stdint.h>
 #include "cmd_handler.h"
@@ -12,15 +12,14 @@
 #include <avr/pgmspace.h>
 
 #else
-// this code used when testing:
+// THIS CODE USED WHEN TESTING
 #define LOG_INFO_FP(fmt, msg) 
 #define LOG_DEBUG_FP(fmt, msg)
-// dummy progmem handler
+// dummy progmem-reader function
 #define pgm_read_byte_near(bp) (*bp)
 
 #endif
 // ------------------------
-
 
 // Globals
 //! table (array) of handler functions

@@ -1,8 +1,7 @@
 #ifndef MSG_H
 #define MSG_H
 // -----------------------------------------------------------------------------
-// Copyright Stephen Stebbing 2015. http://telecnatron.com/
-// $Id: $
+// Copyright Stephen Stebbing 2015. See: http://telecnatron.com/articles/mvsmp/
 // -----------------------------------------------------------------------------
 /**
  * @file   msg.h
@@ -16,7 +15,7 @@
  * the application section. To enable this functionallity, ensure that BOOT_APP 
  * is defined when compiling msg.c
  *
- * The message consists of bytes (uint8_t) being:<UL>
+ * The message consists of an array of bytes (uint8_t) being:<UL>
  *    <LI>Start of message byte (character) as defined by MSG_SOM</LI>
  *    <LI>Message length byte, max 256</LI>
  *    <LI>The message's data bytes</LI>
@@ -25,15 +24,15 @@
  * 
  * Invalid messages are silently ignored and the system will reset back to waiting
  * for a new message.
- * An invalid message can be caused by the chend-of-message character not being received 
+ * An invalid message can be caused by the end-of-message character not being received 
  * when expected, or by a timeout occuring before a completed message has being received.
  *
- * To provide for timing, the <b>msg_tick()</b> function should be called periodically, and when
- * used with MSG_TIMEOUT_TICKS  set the timout period. 
+ * To provide for timing, the <b>msg_tick()</b> function should be called periodically, and, combined
+ * with MSG_TIMEOUT_TICKS, to set the timout period. 
  * With MSG_TIMEOUT_TICKS=8 and calling <b>msg_tick()</b> every 250ms, the timeout value is 2 seconds.
  *
- * When a message is received, the user provided callback function is called which gives access to
- * the message. The callback function has the following signature:<code>
+ * When a message is received, the user provided callback function is called and passed a pointer to the received 
+ * message. The callback function has the following signature:<code>
  *
  *   void handler(struct msg_t *msg)
  *</code>
@@ -60,8 +59,8 @@
 
 // Convienience macros
 #define MSG_DATA(msgp) (msgp->data)
-#define MSG_LEN(msgp) (msgp->len)
-#define MSG_CS(sum)             (uint8_t)(256-sum) 
+#define MSG_LEN(msgp)  (msgp->len)
+#define MSG_CS(sum)    (uint8_t)(256-sum) 
 
 
 //! buffer for holding the message data

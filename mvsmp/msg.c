@@ -1,12 +1,12 @@
 // -----------------------------------------------------------------------------
-// Copyright Stephen Stebbing 2015. http://telecnatron.com/
+// Copyright Stephen Stebbing 2015. See: http://telecnatron.com/articles/mvsmp/
 // -----------------------------------------------------------------------------
 #include "msg.h"
 #include <stddef.h>
 #include "../log.h"
 // -----------------------------------------------------------------------------------
 #ifdef BOOT_APP
-// We are running as an application that calls into the bootloaders code for uart functions.
+// We are running as an application that calls into the bootloaders code for the msg functions.
 // Functions are defined in ../boot/boot_functions.c and not here.
 // -----------------------------------------------------------------------------------
 #else
@@ -23,7 +23,6 @@ void *msg_handler_EOM(msg_t *msg,  uint8_t byte);
 #define MSG_CALL(event, byte)   msg_ctrl->state_fn=msg_ctrl->state_fn(&(msg_ctrl->msg), event, byte) 
 // (re)start timer
 #define MSG_TIMER_START()       msg_timer_set(msg, MSG_TIMEOUT_TICKS)
-
 
 // ------------------------
 // logging function for debugging
@@ -149,4 +148,5 @@ void *msg_handler_EOM(msg_t *msg, uint8_t byte)
     }
     return (void *)msg_handler_SOM;
 }
-#endif
+
+#endif // #ifdef BOOT_APP
