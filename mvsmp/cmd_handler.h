@@ -13,7 +13,6 @@
  */
 
 #include "./msg.h"
-#include <avr/pgmspace.h>
 
 //! Received msg with the cmd number will cause reboot_fn() to be called
 #define CMD_HANDLER_CMD_REBOOT              255

@@ -7,11 +7,17 @@
 // ------------------------
 // logging 
 #ifdef F_CPU
-// this code used when running on mcu
+// this code used when running on mcu:
 #include "../log.h"
+#include <avr/pgmspace.h>
+
 #else
-#define LOG_INFO_FP(fmt, msg)
+// this code used when testing:
+#define LOG_INFO_FP(fmt, msg) 
 #define LOG_DEBUG_FP(fmt, msg)
+// dummy progmem handler
+#define pgm_read_byte_near(bp) (*bp)
+
 #endif
 // ------------------------
 

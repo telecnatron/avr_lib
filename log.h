@@ -1,8 +1,7 @@
 #ifndef LOG_H
 #define LOG_H
 // -----------------------------------------------------------------------------
-// Copyright Stebbing Computing. 2013.
-// $Id: log.h 405 2015-12-27 04:09:25Z steves $
+// Copyright Stephen Stebbing. 2013 - 2016.
 // -----------------------------------------------------------------------------
 /**
  * @file   log.c
@@ -76,7 +75,5 @@ void log_log_P(uint8_t level, const char *pmsg);
 #define LOG_ERROR_P(msg) log_log_P(LOG_LEVEL_ERROR, PSTR(msg))
 #define LOG_P(msg) LOG_INFO_P(msg)
 
-
-
-
+// -----------------------------------------------------------------------------
 #endif
