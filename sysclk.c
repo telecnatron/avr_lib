@@ -43,6 +43,7 @@ inline void sysclk_reset()
     sysclk_ticks=0;
     sysclk_seconds=0;
     sysclk_ticked=0;
+    sysclk_seconds_ticked = 0;
 }
 
 inline uint16_t sysclk_get_ticks()
