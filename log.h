@@ -21,7 +21,7 @@
 #define LOG_LEVEL_WARN  2
 #define LOG_LEVEL_ERROR 3
 
-//! Maximum number of characters allowed in the date string, including terminating \x0
+//! Maximum number of characters allowed in the date string, including terminating 0
 //! If providing log_get_date_cb(), ensure that it does not write more than this number
 //! of characters
 #define LOG_DATE_STR_MAX 15

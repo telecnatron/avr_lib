@@ -9,9 +9,6 @@
 #include <stddef.h>
 
 /**
- * @file   util.h
- * @author Stephen Stebbing 
- * @date   Mon Dec 21 14:17:18 2015
  * 
  * @brief  Utilities that can be shared between bootloader application 
  *  and normal application.

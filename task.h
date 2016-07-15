@@ -31,7 +31,7 @@ void task_tick_alarm(uint8_t tid, uint16_t ticks);
  * Make task unrunnable and schedule to be runnable again
  * once passed number of seconds have elapsed.
  * @param tid Task id of the task
- * @param ticks the number of seconds
+ * @param seconds the number of seconds
  */
 void task_seconds_alarm(uint8_t tid, uint16_t seconds);
 //! set second alarm for currently running task

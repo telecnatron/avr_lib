@@ -117,7 +117,7 @@ typedef struct {
 //! Discard any character that are in the rx circular buffer
 #define UART_FLUSH() (UART.rxbuf_head = UART.rxbuf_tail = UART.rxbuf_count = UART.flags = 0)
 
-//! set baud rate - BAUD mast be defined. eg #define BAUD=9600, or -D BAUD=9600 in Makefile,
+//! set baud rate - BAUD mast be defined. eg \#define BAUD=9600, or -D BAUD=9600 in Makefile,
 //! or define in config.h, or define just prior to call to uart_set_baud()
 void uart_set_baud();
 

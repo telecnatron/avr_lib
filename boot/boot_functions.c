@@ -3,7 +3,7 @@
 // $Id: boot_functions.c 395 2015-12-25 18:35:16Z steves $
 // -----------------------------------------------------------------------------
 /**
- * @file   boot_functions.h
+ * @file   boot_functions.c
  * @author Stephen Stebbing 
  * @date   Mon Dec 21 14:09:38 2015
  * 
@@ -30,7 +30,7 @@
 //! This is the address of the boot exported-function table,
 //! and should be defined in Makefile
 //! see boot_fstab.S for section definition.
-//! #define BOOT_FTAB_START 0x7FCE
+// #define BOOT_FTAB_START 0x7FCE
 #ifndef BOOT_FTAB_START
   #error "BOOT_FTAB_START must be defined to indicate starting address or the boot-function table"
 #endif

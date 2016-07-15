@@ -1,18 +1,18 @@
 // -----------------------------------------------------------------------------
-// Copyright Stebbing Computing. 2013.
-// $Id: $
+// Copyright Stephen Stebbing. 2013 - 2016.
 // -----------------------------------------------------------------------------
+
 /**
- * @file   stdout.inc
- * @author Stephen Stebbing <steves@stebbingcomputing.com>
+ * @file   stdout.h
+ * @author Stephen Stebbing 
  * @date   Sat Aug 30 21:08:39 2014
  * 
  * @brief  This include file eases setup of stdout stream for use of printf type functions.
- * It uses as macro PUTC(c) to output a characer- it must have been defined prior to including this file.
+ * It uses  macro PUTC(c) to output a characer- it must have been defined prior to including this file.
  * In the main() function include the line (or call the macro STDOUT_INIT()):
-
+ *
  *       stdout = &stdoutput;
-
+ *
  * Then printf will be available.
  */
 

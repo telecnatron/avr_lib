@@ -5,7 +5,7 @@
 // $Id: ds1820.h 122 2014-09-03 04:17:38Z steves $
 // -----------------------------------------------------------------------------
 /**
- * @file   ds18b20.h
+ * @file   ds1820.h
  * @author Stephen Stebbing <steves@stebbingcomputing.com>
  * @date   Mon Dec  9 16:40:33 2013
  * 

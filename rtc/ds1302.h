@@ -71,7 +71,7 @@ void ds1302_init();
 /** 
  * Convert the raw (bcd) data contained in the passed dtp, to integer
  * XXX Note: uses 24 hour time, 12 hour is not implemented yet
- * @param rtc_datetime_t Pointer to dtp structure containing raw data
+ * @param dtp Pointer to dtp structure containing raw data
  */
 void ds1302_datetime_raw2int(rtc_datetime_t *dtp);
 

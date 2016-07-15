@@ -16,7 +16,7 @@
 #define RTC_USE_DS1302
 #endif
 
-// times
+//! represents times of day
 typedef struct
 {
     uint8_t second;
@@ -24,7 +24,7 @@ typedef struct
     uint8_t hour;
 } rtc_time_t;
 
-// dates - note year is alway two digits, leading 20 is assumed
+//! represents dates - note year is alway two digits, leading 20 is assumed
 typedef struct
 {
     uint8_t dom;
@@ -33,7 +33,7 @@ typedef struct
     uint8_t year;
 } rtc_date_t;
 
-// structure for holding date-times
+//! structure for holding both a data and a time
 typedef struct
 {
     rtc_time_t time;

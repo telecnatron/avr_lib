@@ -1,10 +1,18 @@
 #ifndef TIMER_H
 #define TIMER_H
 // -----------------------------------------------------------------------------
-// Copyright Stebbing Computing. 2013.
-// $Id: timer.h 427 2016-04-07 04:21:09Z steves $
-// Timers for the various processors
+// Copyright Stephen Stebbing. 2013 - 2016.
 // -----------------------------------------------------------------------------
+/**
+ * @file   timer.h
+ * @author Stephen Stebbing <steves@slap.ss.com>
+ * @date   Fri Jul  8 15:17:44 2016
+ * 
+ * @brief  Wrapper for timer header files for various processors. 
+ * The processor used is determined by having one of the following defined:
+ * ATTINY2313, ATMEGA8, ATMEGA88, ATMEGA168, ATMEGA328
+ */
+
 #include <stddef.h>
 
 // -----------------------------------------------------------------------------

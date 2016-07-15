@@ -48,7 +48,7 @@ void cmd_handler_init(cmd_handler_t *cmd_tab, uint8_t num_handlers, void (*reboo
  * 
  * @param cmd_num The command number.
  * @param msg_data The data that is to be contained in the message. 
- * @param len The length of the data.
+ * @param data_len The length of the data.
  * @param tx_byte_fn Function that is to be called to transmit a byte on the communication channel.
  */
 void cmd_handler_send(uint8_t cmd_num, uint8_t *msg_data, uint8_t data_len, void (*tx_byte_fn)(const char b));
@@ -57,8 +57,8 @@ void cmd_handler_send(uint8_t cmd_num, uint8_t *msg_data, uint8_t data_len, void
  * Send a message that is contained in PROGMEM with passed command numer.
  * 
  * @param cmd_num The command number.
- * @param msg_data The data that is to be contained in the message. Must point to PROGMEM
- * @param len The length of the data.
+ * @param msg_data_P The data that is to be contained in the message. Must point to PROGMEM
+ * @param data_len The length of the data.
  * @param tx_byte_fn Function that is to be called to transmit a byte on the communication channel.
  */
 void cmd_handler_send_P(uint8_t cmd_num, uint8_t *msg_data_P, uint8_t data_len, void (*tx_byte_fn)(const char b));
