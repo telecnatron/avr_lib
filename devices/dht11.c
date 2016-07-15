@@ -63,7 +63,7 @@ uint8_t dht11_read(dht11_data_t *reading)
 	if(DHT11_TIMER_COUNT > DHT11_TIMER_COUNT_80US ){
 	    // no response
 	    sei();
-	    return DHT11_ERROR_NO_RESPONSE_2;
+	    return DHT11_ERROR_NO_RESPONSE_3;
 	}
     }
 
