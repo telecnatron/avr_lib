@@ -28,7 +28,7 @@
 
 //! Pointer to the callback function used for formatting the log-message date string.
 //! Points to a default, override to use your own function.
-extern void (*log_get_date_cb)(char *dts);
+extern void (*log_get_date_cb)(char *dts, uint8_t dts_max_len);
 //! Macro to config custome date callback function.
 #define LOG_INIT_DATE_CB(cbf) log_get_date_cb=cbf
 
