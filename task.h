@@ -35,7 +35,7 @@ void task_tick_alarm(uint8_t tid, uint16_t ticks);
  */
 void task_seconds_alarm(uint8_t tid, uint16_t seconds);
 //! set second alarm for currently running task
-#define TASK_SECONDS_ALARM(seconds) task_seconds_alarm(task_running_id, seconds);
+#define TASK_SECONDS_ALARM(seconds) task_seconds_alarm(task_running_id, seconds)
 
 /** 
  * Make the task with passed tid (ie index into task table) ready to run
