@@ -13,24 +13,19 @@
 
 ;; note that each entry takes 2 bytes
 _boot_ftab:
-	;;  crc functions
-	rjmp bu_crc_xmodem_update	; 0
 	;; uart functions
-	rjmp uart_set_baud	; 2
-	rjmp uart_init		; 4
-	rjmp uart_putc		; 6
-	rjmp uart_puts		; 8
-	rjmp uart_puts_P	;10
-	rjmp uart_write		;12
-	rjmp uart_getc	        ;14
-	;; eeprom functions
-	rjmp bu_eeprom_read_block    ; 16
-	rjmp bu_eeprom_update_block  ; 18
+	rjmp uart_set_baud	; 0
+	rjmp uart_init		; 2
+	rjmp uart_putc		; 4
+	rjmp uart_puts		; 6
+	rjmp uart_puts_P	; 8
+	rjmp uart_write		;10
+	rjmp uart_getc	        ;12
         ;; message functions
-	rjmp msg_init		; 20
-	rjmp msg_rx_byte	; 22
-	rjmp msg_send		; 24
-	rjmp msg_tick		; 26
+	rjmp mmp_init		; 14
+	rjmp mmp_rx_ch	        ; 16
+	rjmp mmp_send		; 18
+	rjmp mmp_tick		; 20
 
 
 

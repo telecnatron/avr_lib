@@ -122,22 +122,21 @@ ISR(UART_RX_ISR)
 {
     // check for errors - if so, set error flags
     if( UART_IS_FRAME_ERROR() || UART_IS_OVERRUN_ERROR()){
-	return;
-    }
-
-    // read received char from rx register
-    char c=UART_REG_UDR;
-    // push received char to rx buffer
-    if(UART.rxbuf_count != UART.rxbuf_size){
-	// there is space in buffer
-	UART.rxbuf[UART.rxbuf_tail++] = c;
-	if(UART.rxbuf_tail == UART.rxbuf_size ){
-	    // loop back to start
-	    UART.rxbuf_tail = 0;
-	}
-	UART.rxbuf_count++;
     }else{
-	// buffer is full, set flag and discard received char
+	// read received char from rx register
+	char c=UART_REG_UDR;
+	// push received char to rx buffer
+	if(UART.rxbuf_count != UART.rxbuf_size){
+	    // there is space in buffer
+	    UART.rxbuf[UART.rxbuf_tail++] = c;
+	    if(UART.rxbuf_tail == UART.rxbuf_size ){
+		// loop back to start
+		UART.rxbuf_tail = 0;
+	    }
+	    UART.rxbuf_count++;
+	}else{
+	    // buffer is full, set flag and discard received char
+	}
     }
 }
 #endif // ifdef BOOT_APP

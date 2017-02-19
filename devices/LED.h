@@ -22,6 +22,8 @@
 
 #include "config.h"
 
+
+#include "../util/io.h"
 #ifndef LED_DEFS
 #warning Using default config. (Suitable for ProMini board LED on pin B5.)
 // Defaults work with Arduino ProMini board:  LED is on pin B5.
