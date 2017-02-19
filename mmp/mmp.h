@@ -13,6 +13,7 @@
  */
 
 #include "config.h"
+#include <stdint.h>
 
 // start of message
 #define MSG_SOM 'S'

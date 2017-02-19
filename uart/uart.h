@@ -39,8 +39,6 @@
 
 //! uart control structure.
 typedef struct {
-    //! rx error flags - for error indication
-    uint8_t flags;
     //! rx circular buffer
     char*  rxbuf;
     uint8_t rxbuf_size;  //! size of queue in bytes.
@@ -86,18 +84,7 @@ typedef struct {
 //! disable RX interrupt
 #define UART_RXINT_DISABLE() (UART_REG_UCSRB &=~ _BV(UART_BIT_RXCIE))
 
-//! Get error status
-#define UART_RX_ERROR() (  UART.rx_flags |= 0   )
-//! Clear error flags
-#define UART_RX_ERROR_CLEAR() (  UART.rx_flags = 0   )
 
-
-// bit values for uart_t.rx_flags
-// rx error flags
-// general error - set when any of the  others are set
-#define UART_FLAG_RX_FRAME_ERROR    1
-#define UART_FLAG_RX_OVERRUN_ERROR  2
-#define UART_FLAG_RX_BUFFER_FULL    3
 
 // convinence macros
 
@@ -115,7 +102,7 @@ typedef struct {
 #define GETC_AVAIL() UART_CHAR_AVAIL()
 
 //! Discard any character that are in the rx circular buffer
-#define UART_FLUSH() (UART.rxbuf_head = UART.rxbuf_tail = UART.rxbuf_count = UART.flags = 0)
+#define UART_FLUSH() (UART.rxbuf_head = UART.rxbuf_tail = UART.rxbuf_count = 0)
 
 //! set baud rate - BAUD mast be defined. eg \#define BAUD=9600, or -D BAUD=9600 in Makefile,
 //! or define in config.h, or define just prior to call to uart_set_baud()

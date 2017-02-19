@@ -44,18 +44,6 @@ void uart_init(char* buf, uint8_t buf_size){
     UART_RXINT_ENABLE();
 }
 
-#if 0
-//! this code will remove any pending char that might happen to be
-//! in the UART_RX register
-static void uart_rx_flush()
-{
-    unsigned char  volatile dummy;
-    while ( UART_REG_UCSRA & _BV(UART_BIT_RXC)) dummy = UART_REG_UDR;
-    // XXX hack to disable -Wunused-but-set-variable warning
-    dummy+=0;
-}
-#endif
-
 
 void uart_set_baud() 
 {
@@ -133,10 +121,8 @@ char uart_getc()
 ISR(UART_RX_ISR)
 {
     // check for errors - if so, set error flags
-    if( UART_IS_FRAME_ERROR()){
-	UART.flags |= _BV(UART_FLAG_RX_FRAME_ERROR);
-    }else if( UART_IS_OVERRUN_ERROR()){
-	UART.flags |= _BV(UART_FLAG_RX_OVERRUN_ERROR);
+    if( UART_IS_FRAME_ERROR() || UART_IS_OVERRUN_ERROR()){
+	return;
     }
 
     // read received char from rx register
@@ -152,7 +138,6 @@ ISR(UART_RX_ISR)
 	UART.rxbuf_count++;
     }else{
 	// buffer is full, set flag and discard received char
-	UART.flags |= _BV(UART_FLAG_RX_BUFFER_FULL);
     }
 }
 #endif // ifdef BOOT_APP
