@@ -19,10 +19,11 @@ void *mmp_handler_CS(mmp_msg_ctrl_t *msg,  uint8_t byte);
 // convienence macros
 #define MMP_TIMER_START() msg->timer=MMP_TIMER_TIMEOUT
 #define MMP_TIMER_STOP() msg->timer=0
+#define MSG_CS(sum)    (uint8_t)(256-sum)
 
 
 // define MSG_USE_LOGGER to have error messages logged
-#ifdef MSG_USE_LOGGER
+#ifdef MMP_USE_LOGGER
 #include "../log.h"
 #define MSG_LOG(msg) LOG_DEBUG(msg)
 #define MSG_LOG_FP(fmt, msg...) LOG_DEBUG_FP(fmt, msg)
@@ -76,13 +77,12 @@ void *mmp_handler_SOM(mmp_msg_ctrl_t *msg,  uint8_t byte)
 
 void *mmp_handler_LEN(mmp_msg_ctrl_t *msg,  uint8_t byte)
 {
-    byte=4;
     msg->msg.len=byte;
     // restart timer
     MMP_TIMER_START();
     // calc checksum
     msg->cs = byte;
-    MSG_LOG("-LEN-");
+    MSG_LOG_FP("-LEN %u-", byte);
     // next, wait for STX character
     return mmp_handler_STX;
 }
@@ -113,7 +113,7 @@ void *mmp_handler_DATA(mmp_msg_ctrl_t *msg, uint8_t byte)
 	// and checksum
 	msg->cs  += byte;
 	MMP_TIMER_START();
-	MSG_LOG("-DATA-");
+	MSG_LOG_FP("-DATA- %c", byte);
 	if( ++msg->count == msg->msg.len ){
 	    // have received all the data
 	    return mmp_handler_EOT;
@@ -138,7 +138,7 @@ void *mmp_handler_EOT(mmp_msg_ctrl_t *msg,  uint8_t byte)
 	return mmp_handler_CS;
     }
     // didn't get end-of-text character
-    MSG_LOG("-EOT FAIL-");
+    MSG_LOG_FP("-EOT FAIL- %c",byte);
     MMP_TIMER_STOP();
     return mmp_handler_SOM;
 }
@@ -180,5 +180,5 @@ void mmp_send(uint8_t *msg_data, uint8_t len, void (*tx_byte_fn)(const char c))
     // send ETX
     tx_byte_fn(MSG_ETX);
     // send checksum
-    tx_byte_fn(cs);
+    tx_byte_fn(MSG_CS( cs));
 }
