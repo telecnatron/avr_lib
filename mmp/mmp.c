@@ -7,6 +7,7 @@
 // State-machine functions
 void *mmp_handler_SOM(mmp_msg_ctrl_t *msg,  uint8_t byte);
 void *mmp_handler_LEN(mmp_msg_ctrl_t *msg,  uint8_t byte);
+void *mmp_handler_FLAGS(mmp_msg_ctrl_t *msg,  uint8_t byte);
 void *mmp_handler_STX(mmp_msg_ctrl_t *msg,  uint8_t byte);
 void *mmp_handler_DATA(mmp_msg_ctrl_t *msg, uint8_t byte);
 void *mmp_handler_EOT(mmp_msg_ctrl_t *msg,  uint8_t byte);
@@ -83,9 +84,23 @@ void *mmp_handler_LEN(mmp_msg_ctrl_t *msg,  uint8_t byte)
     // calc checksum
     msg->cs = byte;
     MSG_LOG_FP("-LEN %u-", byte);
+    // next, wait for FLAGS character
+    return mmp_handler_FLAGS;
+}
+
+
+void *mmp_handler_FLAGS(mmp_msg_ctrl_t *msg,  uint8_t byte)
+{
+    msg->msg.flags=byte;
+    // restart timer
+    MMP_TIMER_START();
+    // calc checksum
+    msg->cs  += byte;
+    MSG_LOG_FP("-FLAGS %u-", byte);
     // next, wait for STX character
     return mmp_handler_STX;
 }
+
 
 
 void *mmp_handler_STX(mmp_msg_ctrl_t *msg, uint8_t byte)
@@ -160,7 +175,7 @@ void *mmp_handler_CS(mmp_msg_ctrl_t *msg,  uint8_t byte)
 }
 
 
-void mmp_send(uint8_t *msg_data, uint8_t len, void (*tx_byte_fn)(const char c))
+void mmp_send(uint8_t *msg_data, uint8_t len, uint8_t flags, void (*tx_byte_fn)(const char c))
 {
     // checksum 
     uint8_t cs=len;
@@ -168,6 +183,8 @@ void mmp_send(uint8_t *msg_data, uint8_t len, void (*tx_byte_fn)(const char c))
     tx_byte_fn(MSG_SOM);
     // send length
     tx_byte_fn(len);
+    // send flags
+    tx_byte_fn(flags);
     // send STX
     tx_byte_fn(MSG_STX);
     // send data
