@@ -2,6 +2,7 @@
 // Copyright Stephen Stebbing 2017. http://telecnatron.com/
 // -----------------------------------------------------------------------------
 #include "mmp.h"
+#include "lib/wdt.h"
 
 // Function  declrations.
 // State-machine functions
@@ -164,6 +165,13 @@ void *mmp_handler_CS(mmp_msg_ctrl_t *msg,  uint8_t byte)
     if( byte == msg->cs){
 	// checksum checks out.
 	// msg received successfully,
+
+#ifndef MMP_NO_REBOOT
+	// check for reboot-message and reboot if so.
+	if(msg->msg.flags==0x0 && msg->msg.len==1 && msg->msg.data[0]=='r'){
+	    wdt_reset_mcu();
+	}
+#endif	
 	// call user msg handler
 	msg->handler(&(msg->msg));
     }else{

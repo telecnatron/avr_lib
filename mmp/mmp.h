@@ -11,9 +11,13 @@
  * @brief  
  * 
  */
-
 #include "config.h"
 #include <stdint.h>
+
+// 
+// Define MMP_NO_REBOOT to disable the reboot message
+//#define MMP_NO_REBOOT
+
 
 // start of message
 #define MSG_SOM 'S'
@@ -47,6 +51,7 @@ typedef struct mmp_msg_ctrl_t {
     //! handler fn, gets call when message has been received
     void (*handler)(mmp_msg_t *msg);
 } mmp_msg_ctrl_t;
+
 
 //! struct for holding state-machine and msg data.
 typedef struct {
@@ -86,11 +91,6 @@ void mmp_rx_ch(mmp_ctrl_t *mmp_ctrl, uint8_t ch);
  * @param tx_byte_fn Function that is to be called to transmit a byte on the communication channel.
  */
 void mmp_send(uint8_t *msg_data, uint8_t len, uint8_t flags, void (*tx_byte_fn)(const char c));
-
-
-
-
-
 
 #endif /* _MMP_H */
 
