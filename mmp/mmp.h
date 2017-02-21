@@ -13,6 +13,7 @@
  */
 
 #include "config.h"
+#include <stdint.h>
 
 // start of message
 #define MSG_SOM 'S'
@@ -26,6 +27,8 @@ typedef struct mmp_msg_t {
     uint8_t *data;
     //! expected length of the message being received, or the length of a successfully received msg.
     uint8_t len;
+    //! flags as specified by higher level protocols, not significant here.
+    uint8_t flags;
 } mmp_msg_t;
 
 typedef struct mmp_msg_ctrl_t {
@@ -82,7 +85,7 @@ void mmp_rx_ch(mmp_ctrl_t *mmp_ctrl, uint8_t ch);
  * @param len The length of the data.
  * @param tx_byte_fn Function that is to be called to transmit a byte on the communication channel.
  */
-void mmp_send(uint8_t *msg_data, uint8_t len, void (*tx_byte_fn)(const char c));
+void mmp_send(uint8_t *msg_data, uint8_t len, uint8_t flags, void (*tx_byte_fn)(const char c));
 
 
 
