@@ -44,7 +44,8 @@
 // Turn the LED on.
 #define	LED_ON() LED_W |= _BV(LED_PIN)
 //! Toggle the LED
-#define LED_TOGGLE() PIN_TOGGLE(LED_W,LED_PIN)
+#define LED_TOGGLE() PIN_TOGGLE(LED_W, LED_PIN)
+#define PIN_TOGGLE(register, bit) (register ^= _BV(bit))
 //! Initialise LED by setting LED pin as output
 #define LED_INIT() LED_CTL |= _BV(LED_PIN)
 #define LED_STATUS() (LED_R & _BV(LED_PIN)) ? 1: 0
