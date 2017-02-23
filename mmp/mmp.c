@@ -15,9 +15,6 @@ void *mmp_handler_EOT(mmp_msg_ctrl_t *msg,  uint8_t byte);
 void *mmp_handler_CS(mmp_msg_ctrl_t *msg,  uint8_t byte);
 
 
-// timeout in ticks
-#define MMP_TIMER_TIMEOUT 2
-
 // convienence macros
 #define MMP_TIMER_START() msg->timer=MMP_TIMER_TIMEOUT
 #define MMP_TIMER_STOP() msg->timer=0
@@ -34,13 +31,14 @@ void *mmp_handler_CS(mmp_msg_ctrl_t *msg,  uint8_t byte);
 #define MSG_LOG_FP(fmt, msg...)
 #endif
 
-void mmp_init(mmp_ctrl_t *msg_ctrl,  uint8_t *buf, uint8_t buf_size,  void (*user_handler)(mmp_msg_t *msg))
+void mmp_init(mmp_ctrl_t *msg_ctrl,  uint8_t *buf, uint8_t buf_size,  void (*user_handler)(void *user_data, mmp_msg_t *msg), void *user_data)
 {
     msg_ctrl->ctrl.msg.data=buf;
     msg_ctrl->ctrl.data_max_len=buf_size;
     // set initial state
     msg_ctrl->state_fn = mmp_handler_SOM;
     msg_ctrl->ctrl.handler = user_handler;
+    msg_ctrl->ctrl.user_data= user_data;
 }
 
 
@@ -173,7 +171,7 @@ void *mmp_handler_CS(mmp_msg_ctrl_t *msg,  uint8_t byte)
 	}
 #endif	
 	// call user msg handler
-	msg->handler(&(msg->msg));
+	msg->handler(msg->user_data, &(msg->msg));
     }else{
 	// checksum failed
 	MSG_LOG_FP("-CS FAIL- e: 0x%x, c: 0x%x", msg->cs, byte);
@@ -193,6 +191,7 @@ void mmp_send(uint8_t *msg_data, uint8_t len, uint8_t flags, void (*tx_byte_fn)(
     tx_byte_fn(len);
     // send flags
     tx_byte_fn(flags);
+    cs += flags;
     // send STX
     tx_byte_fn(MSG_STX);
     // send data

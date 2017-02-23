@@ -18,21 +18,25 @@
 // Define MMP_NO_REBOOT to disable the reboot message
 //#define MMP_NO_REBOOT
 
+// Timeout in ticks
+#define MMP_TIMER_TIMEOUT 2
 
+// Message indicator characters:
 // start of message
-#define MSG_SOM 'S'
+#define MSG_SOM '\1'
 // start of text
-#define MSG_STX 'T'
+#define MSG_STX '\2'
 // end of text
-#define MSG_ETX 'E'
+#define MSG_ETX '\3'
 
 //! buffer for holding the message data
 typedef struct mmp_msg_t {
-    uint8_t *data;
     //! expected length of the message being received, or the length of a successfully received msg.
     uint8_t len;
     //! flags as specified by higher level protocols, not significant here.
     uint8_t flags;
+    //! The message data
+    uint8_t *data;
 } mmp_msg_t;
 
 typedef struct mmp_msg_ctrl_t {
@@ -49,7 +53,9 @@ typedef struct mmp_msg_ctrl_t {
     //! crc check sum of received message's len and data bytes
     uint8_t cs; 
     //! handler fn, gets call when message has been received
-    void (*handler)(mmp_msg_t *msg);
+    void (*handler)(void *user_data, mmp_msg_t *msg);
+    //! user data, gets passed to the handler function
+    void *user_data;
 } mmp_msg_ctrl_t;
 
 
@@ -69,8 +75,9 @@ typedef struct {
  * @param buf The buffer that will be used to hold the message data that is received.
  * @param buf_size The size of the buffer in bytes, maximum is 256.
  * @param user_msg_handler The callback function that will be called when a message has been successfully received.
+ * @param user_data
  */
-void mmp_init(mmp_ctrl_t *mmp_ctrl, uint8_t *buf, uint8_t buf_size, void (*user_msg_handler)(mmp_msg_t *msg));
+void mmp_init(mmp_ctrl_t *msg_ctrl,  uint8_t *buf, uint8_t buf_size,  void (*user_handler)(void *user_data, mmp_msg_t *msg), void *user_data);
 
 
 void mmp_tick(mmp_ctrl_t *mmp_ctrl);
