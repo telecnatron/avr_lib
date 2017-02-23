@@ -4,8 +4,27 @@
 #include "mmp_cmd.h"
 #include "../log.h"
 
-void mmp_cmd_send_reply(void *handle, uint8_t status, uint8_t *data, uint8_t data_len)
+// define MSG_USE_LOGGER to have error messages logged
+#ifdef MMP_CMD_LOGGING
+#include "../log.h"
+#define MMP_CMD_LOG(fmt, msg...) LOG_INFO_FP(fmt, msg)
+#define MMP_CMD_LOG_WARN(fmt, msg...) LOG_WARN_FP(fmt, msg)
+#define MMP_CMD_LOG_DEBUG(fmt, msg...) LOG_DEBUG_FP(fmt, msg)
+#else
+#define MMP_CMD_LOG(fmt, msg...)
+#define MMP_CMD_LOG_WARN(fmt, msg...)
+#define MMP_CMD_LOG_DEBUG(fmt, msg...)
+#endif
+
+
+void mmp_cmd_reply(void *handle, uint8_t status, uint8_t *data, uint8_t data_len)
 {
+    mmp_cmd_ctrl_t *ctrl = (mmp_cmd_ctrl_t *)handle;
+    mmp_msg_t *msg = &(ctrl->mmp_ctrl.ctrl.msg);
+    // set status
+    msg->data[1]=status;
+    // send reply message
+    mmp_send(msg->data, data_len+2, msg->flags, ctrl->tx_byte_fn);
 }
 
 
@@ -14,29 +33,23 @@ void mmp_cmd_msg_handler(void *user_data, mmp_msg_t *msg)
     // cast pointer to mmp_cmd_ctrl_t
     mmp_cmd_ctrl_t *ctrl = (mmp_cmd_ctrl_t *)user_data;
 
-    // XXX debug
-    static unsigned int msg_count;
-    LOG_INFO_FP("MSG RECEIVED: flags: 0x%02u: %u",msg->flags, ++msg_count);
 
     // if cmd message, echo it back to them
     if (MMP_FLAGS_IS_CMD_MSG(msg->flags)){
 	// yup, it's a command-message that's been received.
 	// First byte of data is cmd, second byte is used for the status,
 	// therefore data must be at least 2 bytes
-	LOG_INFO_FP("CMD MSG len: %02u",msg->len);
 	if(msg->len >=2 ){	
 	    uint8_t cmd = msg->data[0];
-	    LOG_INFO_FP("CMD MSG cmd: %u", cmd);
 	    if( cmd < ctrl->num_handlers ){
 		// valid command, call handler
-		LOG_INFO_FP("calling handler for cmd: %02u", cmd);
 		// calc lengths to allow for cmd and status bytes
 		uint8_t data_len = msg->len-2;
 		uint8_t data_max_len = ctrl->mmp_ctrl.ctrl.data_max_len -2;
 		ctrl->cmd_handler_tab[cmd](ctrl, cmd, data_len, data_max_len, msg->data+2);
 	    }else{
-		// invalid command
-		LOG_WARN_FP("invalid command: %u", cmd);
+		// invalid command, ie cmd number exceeds number of entries in cmd table
+		MMP_CMD_LOG_WARN("invalid command: %u", cmd);
 	    }
 //	    mmp_send(msg->data, msg->len, msg->flags, ((mmp_cmd_ctrl_t *)user_data)->tx_byte_fn);
 	}else{

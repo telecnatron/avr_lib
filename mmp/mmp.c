@@ -3,6 +3,7 @@
 // -----------------------------------------------------------------------------
 #include "mmp.h"
 #include "lib/wdt.h"
+#include <stdlib.h>
 
 // Function  declrations.
 // State-machine functions
@@ -22,13 +23,13 @@ void *mmp_handler_CS(mmp_msg_ctrl_t *msg,  uint8_t byte);
 
 
 // define MSG_USE_LOGGER to have error messages logged
-#ifdef MMP_USE_LOGGER
+#ifdef MMP_LOGGING
 #include "../log.h"
-#define MSG_LOG(msg) LOG_DEBUG(msg)
-#define MSG_LOG_FP(fmt, msg...) LOG_DEBUG_FP(fmt, msg)
+#define MMP_LOG(fmt, msg...) LOG_INFO_FP(fmt, msg)
+#define MMP_LOG_DEBUG(fmt, msg...) LOG_DEBUG_FP(fmt, msg)
 #else
-#define MSG_LOG(msg)
-#define MSG_LOG_FP(fmt, msg...)
+#define MMP_LOG(fmt, msg...)
+#define MMP_LOG_DEBUG(fmt, msg...)
 #endif
 
 void mmp_init(mmp_ctrl_t *msg_ctrl,  uint8_t *buf, uint8_t buf_size,  void (*user_handler)(void *user_data, mmp_msg_t *msg), void *user_data)
@@ -57,7 +58,7 @@ void mmp_tick(mmp_ctrl_t *msg_ctrl)
 	{
 	    // timer has expired.
 	    msg_ctrl->state_fn = mmp_handler_SOM;
-	    MSG_LOG("timeout");
+	    MMP_LOG("mmp tick timeout", NULL);
 	}
     }
 }
@@ -68,7 +69,7 @@ void *mmp_handler_SOM(mmp_msg_ctrl_t *msg,  uint8_t byte)
     if( byte == MSG_SOM ){
 	// got the start-of-message character
 	MMP_TIMER_START();
-	MSG_LOG("-SOM-");
+	MMP_LOG_DEBUG("-SOM-", NULL);
 	return mmp_handler_LEN;
     }
     return mmp_handler_SOM;
@@ -82,7 +83,7 @@ void *mmp_handler_LEN(mmp_msg_ctrl_t *msg,  uint8_t byte)
     MMP_TIMER_START();
     // calc checksum
     msg->cs = byte;
-    MSG_LOG_FP("-LEN %u-", byte);
+    MMP_LOG_DEBUG("-LEN %u-", byte);
     // next, wait for FLAGS character
     return mmp_handler_FLAGS;
 }
@@ -95,7 +96,7 @@ void *mmp_handler_FLAGS(mmp_msg_ctrl_t *msg,  uint8_t byte)
     MMP_TIMER_START();
     // calc checksum
     msg->cs  += byte;
-    MSG_LOG_FP("-FLAGS %u-", byte);
+    MMP_LOG_DEBUG("-FLAGS %u-", byte);
     // next, wait for STX character
     return mmp_handler_STX;
 }
@@ -110,10 +111,10 @@ void *mmp_handler_STX(mmp_msg_ctrl_t *msg, uint8_t byte)
 	MMP_TIMER_START();
 	// prepare to receive data
 	msg->count=0;
-	MSG_LOG("-STX-");
+	MMP_LOG_DEBUG("-STX-", NULL);
 	return mmp_handler_DATA;
     }
-    MSG_LOG("-STX FAIL-");
+    MMP_LOG("-STX FAIL-", NULL);
     MMP_TIMER_STOP();
     return mmp_handler_SOM;
 }
@@ -127,7 +128,7 @@ void *mmp_handler_DATA(mmp_msg_ctrl_t *msg, uint8_t byte)
 	// and checksum
 	msg->cs  += byte;
 	MMP_TIMER_START();
-	MSG_LOG_FP("-DATA- %c", byte);
+	MMP_LOG_DEBUG("-DATA- %c", byte);
 	if( ++msg->count == msg->msg.len ){
 	    // have received all the data
 	    return mmp_handler_EOT;
@@ -136,7 +137,7 @@ void *mmp_handler_DATA(mmp_msg_ctrl_t *msg, uint8_t byte)
 	return mmp_handler_DATA;
     }
     // max length exceeded.
-    MSG_LOG("-DATA LEN EXCEEDED-");
+    MMP_LOG("-DATA LEN EXCEEDED-", NULL);
     MMP_TIMER_STOP();
     return mmp_handler_SOM;
 }
@@ -148,11 +149,11 @@ void *mmp_handler_EOT(mmp_msg_ctrl_t *msg,  uint8_t byte)
 	// got the end-of-text character
 	MMP_TIMER_START();
 	// expect checksum next
-	MSG_LOG("-EOT-");
+	MMP_LOG_DEBUG("-EOT-", NULL);
 	return mmp_handler_CS;
     }
     // didn't get end-of-text character
-    MSG_LOG_FP("-EOT FAIL- %c",byte);
+    MMP_LOG("-EOT FAIL- %c",byte);
     MMP_TIMER_STOP();
     return mmp_handler_SOM;
 }
@@ -174,7 +175,7 @@ void *mmp_handler_CS(mmp_msg_ctrl_t *msg,  uint8_t byte)
 	msg->handler(msg->user_data, &(msg->msg));
     }else{
 	// checksum failed
-	MSG_LOG_FP("-CS FAIL- e: 0x%x, c: 0x%x", msg->cs, byte);
+	MMP_LOG("-CS FAIL- e: 0x%x, c: 0x%x", msg->cs, byte);
     }
     MMP_TIMER_STOP();
     return mmp_handler_SOM;

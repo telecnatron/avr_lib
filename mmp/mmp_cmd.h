@@ -17,6 +17,12 @@
 #include "flags.h"
 
 
+#ifndef MMP_CMD_DEFS
+#warning "using default config"
+// define to enable logging, undef to disable
+#define MMP_CMD_LOGGING
+#endif
+
 //! type for message-handler callback functions
 typedef  void (*mmp_cmd_handler_t)(void *handle, uint8_t cmd, uint8_t data_len, uint8_t data_max_len, uint8_t *data);
 
@@ -32,7 +38,6 @@ typedef struct mmp_cmd_ctrl_t{
     // number of entries in cmd_handler_tab
     uint8_t num_handlers;
 }mmp_cmd_ctrl_t;
-
 
 
 /** 
@@ -51,18 +56,25 @@ void mmp_cmd_init(mmp_cmd_ctrl_t *ctrl, uint8_t* msg_buf, uint8_t msg_buf_size,
 
 
 /** 
+ * 
+ * 
+ * @param handle 
+ * @param status 
+ * @param data 
+ * @param data_len 
+ */
+void mmp_cmd_reply(void *handle, uint8_t status, uint8_t *data, uint8_t data_len);
+
+
+/** 
  * Send a message with flags byte set to indicate that
  * message is asynchronous (ie not a response to a command message)
- */
-/** 
- * 
  * 
  * @param msg_data 
  * @param len 
  * @param tx_byte_fn Callback function that is used to send the message's bytes.
  */
 void mmp_async_send(uint8_t *msg_data, uint8_t len, void (*tx_byte_fn)(const char c));
-
 
 void mmp_cmd_rx_ch(mmp_cmd_ctrl_t *mmp_cmd_ctrl, uint8_t ch);
 

@@ -15,11 +15,16 @@
 #include <stdint.h>
 
 // 
-// Define MMP_NO_REBOOT to disable the reboot message
-//#define MMP_NO_REBOOT
 
+
+#ifndef MMP_DEFS
+#define MMP_DEFS
+#warning "Using default config"d
 // Timeout in ticks
 #define MMP_TIMER_TIMEOUT 2
+// Define MMP_NO_REBOOT to disable the reboot message
+#undef MMP_NO_REBOOT
+#endif
 
 // Message indicator characters:
 // start of message
