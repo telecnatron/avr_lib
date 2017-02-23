@@ -18,8 +18,7 @@
 
 
 #ifndef MMP_DEFS
-#define MMP_DEFS
-#warning "Using default config"d
+#warning "Using default config"
 // Timeout in ticks
 #define MMP_TIMER_TIMEOUT 2
 // Define MMP_NO_REBOOT to disable the reboot message
