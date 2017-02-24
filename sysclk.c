@@ -38,7 +38,7 @@ inline void sysclk_start()
     SYSCLK_INT_ENABLE();
 }
 
-inline void sysclk_reset()
+void sysclk_reset()
 {
     sysclk_ticks=0;
     sysclk_seconds=0;
