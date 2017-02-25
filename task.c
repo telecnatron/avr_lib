@@ -124,6 +124,8 @@ void task_init(uint8_t task_num, void(*task_callback)(void *data), void *data, u
 void task_num_ready(uint8_t task_num, uint8_t ready)
 {
     task_t *task = &(task_ctrl.task_tab[task_num]);
+    TASK_UNSET_SECONDS_ALARM(task);
+    TASK_UNSET_TICK_ALARM(task);
     if (ready){
 	TASK_LOG_DEBUG("%s:%u: ready %u",__FILE__,__LINE__,task_ctrl.tick_count, task_num);
 	TASK_READY(task);
