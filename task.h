@@ -1,110 +1,131 @@
-#ifndef TASK_H
-#define TASK_H
+#ifndef _TASK_H
+#define _TASK_H 1
 // -----------------------------------------------------------------------------
-// Copyright Stebbing Computing. 2013.
-// $Id: task.h 148 2014-09-26 07:30:50Z steves $
+// Copyright Stephen Stebbing 2017. http://telecnatron.com/
 // -----------------------------------------------------------------------------
-#include <stdint.h>
-#include "config.h"
+/**
+ * @file   task.h
+ * @author steves
+ * @date   2017/02/25 01:10:34
+ * 
+ * @brief  
+ * 
+ */
 
-// maximum number of tasks - maybe overriden in  config.h etc
-#ifndef TASK_NUM_TASKS
-#define TASK_NUM_TASKS 0
+#include "config.h"
+#include <stdint.h>
+
+// Configuration defines
+#ifndef TASK_NUM_TASKS 
+#error "TASK_NUM_TASKS is not defined."
 #endif
 
 
-//! id (index into TaskTable) of the task that is currently running,
-//! only valid whilst in task_run(), otherwise is id of task that was last run
-extern uint8_t task_running_id;
+void task_dump();
 
 /** 
- * Make task unrunnable and schedule to be runnable again
- * once passed number of ticks have elapsed.
- * @param tid Task id of the task
- * @param ticks the number of ticks 
+ * 
+ * 
+ * @param task_num 
+ * @param task 
+ * @param data 
+ * @param run 
  */
-void task_tick_alarm(uint8_t tid, uint16_t ticks);
-//! set tick alarm for currently running task
-#define TASK_TICK_ALARM(ticks) task_tick_alarm(task_running_id, ticks)
+void task_init(uint8_t task_num, void(*task_callback)(void *data), void *data, uint8_t run);
 
 /** 
- * Make task unrunnable and schedule to be runnable again
- * once passed number of seconds have elapsed.
- * @param tid Task id of the task
- * @param seconds the number of seconds
+ * 
+ * 
+ * @param task_num 
+ * @param ticks 
  */
-void task_seconds_alarm(uint8_t tid, uint16_t seconds);
-//! set second alarm for currently running task
-#define TASK_SECONDS_ALARM(seconds) task_seconds_alarm(task_running_id, seconds)
+void task_num_set_tick_timer(uint8_t task_num, uint16_t ticks);
 
 /** 
- * Make the task with passed tid (ie index into task table) ready to run
- * @param tid Task id number of the task to be made ready
+ * 
+ * 
+ * @param ticks 
  */
-void task_ready(uint8_t tid);
+void task_set_tick_timer(uint16_t ticks);
 
 /** 
- * Make the task with passed tid (ie index into task table) ready to run
- * @param tid Task id number of the task to be made ready
+ * 
+ * 
+ * @param task_num 
+ * @param ticks 
  */
-void task_unready(uint8_t tid);
-#define TASK_UNREADY() task_unready(task_running_id);
-
-//! Return true if task is ready, false otherwise
-uint8_t task_is_ready(uint8_t tid);
-
-//! Return true if task is sleeping on either second timer or tick timer
-uint8_t task_is_sleeping(uint8_t tid);
+void task_num_set_seconds_timer(uint8_t task_num, uint16_t ticks);
 
 /** 
- * Loop thru the task table, calling the task function of any tasks that are flagged
- * as runnable. Starts with task 0
+ * 
+ * 
+ * @param ticks 
+ */
+void task_set_seconds_timer(uint16_t ticks);
+
+/** 
+ * 
+ * 
  */
 void task_run();
 
 /** 
- * Initialise a task by making entry in the task table, flags and timers are cleared
- * @param task_num The task id (tid). This is index into task_table
- * @param task Pointer to the function that gets called when the task is run.
- */
-void task_init_task(uint8_t task_num, void (* task)());
-
-
-/** 
- *  Initialise task and make it ready by means of calls to task_init_task()
- *  and task_ready()
- * @param task_num The task id (tid). This is index into task_table
- * @param task Pointer to the function that gets called when the task is run.
- */
-void task_init_ready(uint8_t task_num, void (* task)());
-
-/** 
- * Make task with passed id unrunnable for passed number of ticks,
- * task_tick() will then make it runnable when tick period has elapsed
- * @param tid The id of the task
- * @param ticks The number of ticks
- */
-void task_wait_ticks(uint8_t tid, uint16_t ticks);
-
-/** 
- * Make task with passed id unrunnable for passed number of seconds,
- * task_tick() will then make it runnable when second period has elapsed
- * @param tid The id of the task
- * @param seconds The number of seconds
- */
-void task_wait_seconds(uint8_t tid, uint16_t seconds);
-
-
-/** 
- * Should be called by the system each time a tick period has elapsed,
- * decrements the task's tick timers
+ * 
+ * 
  */
 void task_tick();
 
 /** 
- * Should be called by the system each time a second period has elapsed,
- * decrements the task's second timers
+ * 
+ * 
  */
 void task_seconds_tick();
 
-#endif
+/** 
+ * Set the callback function that is to be called for task number task_num
+ * 
+ * @param task_num The number of the task for which callback function is to be set
+ * @param callback Pointer to the callback function.
+ */
+void task_num_set_callback(uint8_t task_num, void (* callback)(void *data));
+
+/** 
+ * Set the callback function that is to be called for the current task.
+ * 
+ * @param callback Pointer to the callback function.
+ */
+void task_set_callback(void (* callback)(void *data));
+
+/** 
+ * 
+ * 
+ * @param task_num 
+ * @param data 
+ */
+void task_num_set_user_data(uint8_t task_num, void *data);
+
+/** 
+ * 
+ * 
+ * @param data Pointer to the user data
+ */
+void task_set_user_data(void *data);
+
+
+/** 
+ * Make task ready to run, or unready to run.
+ * 
+ * @param task_num The number of the task to be made ready (or unready)
+ * @param ready if zero then task is made unready, or ready otherwise
+ */
+void task_num_ready(uint8_t task_num, uint8_t ready);
+
+/** 
+ * Make current task ready to run, or unready to run
+ * 
+ * @param ready if zero then task is made unready, or ready otherwise
+ */
+void task_ready(uint8_t ready);
+
+#endif /* _TASK_H */
+
