@@ -20,9 +20,6 @@
 #error "TASK_NUM_TASKS is not defined."
 #endif
 
-
-void task_dump();
-
 /** 
  * 
  * 
