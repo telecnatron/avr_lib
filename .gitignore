@@ -4,3 +4,4 @@
 *.lst
 *.map
 *.o
+doc/doxygen
