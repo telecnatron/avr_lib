@@ -8,7 +8,7 @@
  * @author steves
  * @date   2017/02/25 01:10:34
  * 
- * @brief  
+ * @brief  Tasking (co-routine) system for AVR.
  * 
  */
 
@@ -16,17 +16,19 @@
 #include <stdint.h>
 
 // Configuration defines
+//! \def TASK_NUM_TASKS 
+//! \brief The number of tasks in the task table. This must be defined prior to including this file.
 #ifndef TASK_NUM_TASKS 
 #error "TASK_NUM_TASKS is not defined."
 #endif
 
 /** 
+ * Initialise a task.
  * 
- * 
- * @param task_num 
- * @param task 
- * @param data 
- * @param run 
+ * @param task_num The number of the task. Must be unique amongst all tasks and within range: 0 <= task_num < TASK_NUM_TASKS
+ * @param task Pointer to the task's callback function that will be called whenever the task is run
+ * @param data Pointer that will be passed as parameter to task's calllback function when it is called. May be NULL.
+ * @param run Flag to indicate whether the task should be made ready (ie runnable). If non-zero, task is made ready, or unready otherwise
  */
 void task_init(uint8_t task_num, void(*task_callback)(void *data), void *data, uint8_t run);
 
