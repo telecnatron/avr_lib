@@ -75,29 +75,21 @@ typedef char           (*PF_CHAR)();
 typedef unsigned char  (*PF_UCHAR)();
 typedef uint16_t       (*PF_UINT16)();
 
-#define BOOT_FN_CALL(offset, msg)   return ((PF_UINT16)(( BOOT_FTAB_START  +offset )/2))(crc,data);
-
 // Jump table offsets of the various functions.
 // These must correspond to addresses as set in boot_ftab.S
-BOOT_FADDR_UART_SET_BAUD  0x0
-BOOT_FADDR_UART_INIT      0x2
-BOOT_FADDR_UART_PUTC      0x4
-BOOT_FADDR_UART_PUTS      0x6
-BOOT_FADDR_UART_PUTS_P    0x8
-BOOT_FADDR_UART_WRITE     0xa
-BOOT_FADDR_UART_GETC      0xc
-BOOT_FADDR_MMP_INIT       0xe
-BOOT_FADDR_MMP_RX_CH      0x10
-BOOT_FADDR_MMP_SEND       0x12
-BOOT_FADDR_MMP_TICK       0x14
+#define BOOT_FADDR_UART_SET_BAUD  0x0
+#define BOOT_FADDR_UART_INIT      0x2
+#define BOOT_FADDR_UART_PUTC      0x4
+#define BOOT_FADDR_UART_PUTS      0x6
+#define BOOT_FADDR_UART_PUTS_P    0x8
+#define BOOT_FADDR_UART_WRITE     0xa
+#define BOOT_FADDR_UART_GETC      0xc
+#define BOOT_FADDR_MMP_INIT       0xe
+#define BOOT_FADDR_MMP_RX_CH      0x10
+#define BOOT_FADDR_MMP_SEND       0x12
+#define BOOT_FADDR_MMP_TICK       0x14
 
 // function declarations
-static __inline__ uint16_t bu_crc_xmodem_update(uint16_t crc, uint8_t data)
-{
-    BOOT_FN_CALL(BOOT_FADDR_XMODEM_UPDATE, "(crc,data)")
-//  return ((PF_UINT16)(( BOOT_FTAB_START  +0 )/2))(crc,data);
-}
-
 __inline__ void uart_set_baud()
 {
     ((PF_VOID)((BOOT_FTAB_START + BOOT_FADDR_UART_SET_BAUD)/2))();
@@ -130,7 +122,7 @@ __inline__ void uart_write(char* buf, unsigned int size)
 
 __inline__ char uart_getc()
 {
-    ((PF_CHAR)((BOOT_FTAB_START + BOOT_FADDR_UART_GETC)/2))();
+    return ((PF_CHAR)((BOOT_FTAB_START + BOOT_FADDR_UART_GETC)/2))();
 }
 
 
