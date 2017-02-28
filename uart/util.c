@@ -1,6 +1,10 @@
 // -----------------------------------------------------------------------------
-// Copyright Stephen Stebbing. 2015.
-// $Id: util.c 427 2016-04-07 04:21:09Z steves $
+// Copyright Stephen Stebbing 2017. http://telecnatron.com/
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+//
 // -----------------------------------------------------------------------------
 #include "util.h"
 #include "uart.h"

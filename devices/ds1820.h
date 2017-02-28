@@ -1,8 +1,12 @@
 #ifndef DS1820_H
 #define DS1820_H
 // -----------------------------------------------------------------------------
-// Copyright Stebbing Computing. 2013.
-// $Id: ds1820.h 122 2014-09-03 04:17:38Z steves $
+// Copyright Stebbing Computing 2017. http://telecnatron.com/
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+//
 // -----------------------------------------------------------------------------
 /**
  * @file   ds1820.h

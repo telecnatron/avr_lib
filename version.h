@@ -1,3 +1,3 @@
-#define AVR_LIB_VERSION "1.0"
+#define AVR_LIB_VERSION "2.0"
 
 
