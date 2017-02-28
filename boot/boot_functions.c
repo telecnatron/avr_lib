@@ -1,6 +1,10 @@
 // -----------------------------------------------------------------------------
 // Copyright Stephen Stebbing 2015. http://telecnatron.com/
-// $Id: boot_functions.c 395 2015-12-25 18:35:16Z steves $
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+//
 // -----------------------------------------------------------------------------
 /**
  * @file   boot_functions.c
@@ -25,7 +29,7 @@
 #include <stdlib.h>
 #include <avr/interrupt.h>
 #include "../uart/uart.h"
-#include "../mvsmp/msg.h"
+#include "../mmp/mmp.h"
 
 //! This is the address of the boot exported-function table,
 //! and should be defined in Makefile
@@ -36,7 +40,7 @@
 #endif
 
 
-// UART ISR: We use this ISR which just jumps to uart rx ISR in the bootloader's
+// UART ISR: In the app, we use this ISR which just jumps to corresponding ISR in the bootloader's
 // ISR table.
 void  UART_RX_ISR(void) __attribute__((naked));
 ISR(UART_RX_ISR)
@@ -75,20 +79,17 @@ typedef uint16_t       (*PF_UINT16)();
 
 // Jump table offsets of the various functions.
 // These must correspond to addresses as set in boot_ftab.S
-BOOT_FADDR_XMODEM_UPDATE  0x0
-BOOT_FADDR_UART_SET_BAUD  0x2
-BOOT_FADDR_UART_INIT      0x4
-BOOT_FADDR_UART_PUTC      0x6
-BOOT_FADDR_UART_PUTS      0x8
-BOOT_FADDR_UART_PUTS_P    0xa
-BOOT_FADDR_UART_WRITE_P   0xc
-BOOT_FADDR_UART_GETC      0xe
-BOOT_FADDR_EEPROM_READ_BLOCK   0x10
-BOOT_FADDR_EEPROM_UPDATE_BLOCK 0x12
-BOOT_FADDR_MSG_INIT            0x14
-BOOT_FADDR_MSG_RX_BYTE         0x16
-BOOT_FADDR_MSG_SEND            0x18
-BOOT_FADDR_MSG_TICK            0x1a
+BOOT_FADDR_UART_SET_BAUD  0x0
+BOOT_FADDR_UART_INIT      0x2
+BOOT_FADDR_UART_PUTC      0x4
+BOOT_FADDR_UART_PUTS      0x6
+BOOT_FADDR_UART_PUTS_P    0x8
+BOOT_FADDR_UART_WRITE     0xa
+BOOT_FADDR_UART_GETC      0xc
+BOOT_FADDR_MMP_INIT       0xe
+BOOT_FADDR_MMP_RX_CH      0x10
+BOOT_FADDR_MMP_SEND       0x12
+BOOT_FADDR_MMP_TICK       0x14
 
 // function declarations
 static __inline__ uint16_t bu_crc_xmodem_update(uint16_t crc, uint8_t data)
@@ -99,65 +100,56 @@ static __inline__ uint16_t bu_crc_xmodem_update(uint16_t crc, uint8_t data)
 
 __inline__ void uart_set_baud()
 {
-    BOOT_FN_CALL(BOOT_FADDR_UART_SET_BAUD, "()")
+    ((PF_VOID)((BOOT_FTAB_START + BOOT_FADDR_UART_SET_BAUD)/2))();
 }
 
 __inline__ void uart_init(char* buf, uint8_t buf_size)
 {
-    BOOT_FN_CALL(BOOT_FADDR_UART_INIT, "(buf, buf_size)")
+    ((PF_VOID)((BOOT_FTAB_START + BOOT_FADDR_UART_INIT)/2))(buf, buf_size);
 }
 
 __inline__ void uart_putc(const char c)
 {
-    BOOT_FN_CALL(BOOT_FADDR_UART_PUTC, "(c)")
+    ((PF_VOID)((BOOT_FTAB_START + BOOT_FADDR_UART_PUTC)/2))(c);
 }
 
 __inline__ void uart_puts(const char* pc)
 {
-    BOOT_FN_CALL(BOOT_FADDR_UART_PUTS, "(c)")
+    ((PF_VOID)((BOOT_FTAB_START + BOOT_FADDR_UART_PUTS)/2))(pc);
 }
 
 __inline__ void uart_puts_P(const char* pc)
 {
-    BOOT_FN_CALL(BOOT_FADDR_UART_PUTS_P, "(pc)")
+    ((PF_VOID)((BOOT_FTAB_START + BOOT_FADDR_UART_PUTS_P)/2))(pc);
 }
 
 __inline__ void uart_write(char* buf, unsigned int size)
 {
-    BOOT_FN_CALL(BOOT_FADDR_UART_WRITE_P, "(buf,size)")
+    ((PF_VOID)((BOOT_FTAB_START + BOOT_FADDR_UART_WRITE)/2))(buf, size);
 }
 
 __inline__ char uart_getc()
 {
-    BOOT_FN_CALL(BOOT_FADDR_UART_GETC, "()")
+    ((PF_CHAR)((BOOT_FTAB_START + BOOT_FADDR_UART_GETC)/2))();
 }
 
-__inline__ void bu_eeprom_read_block(void * __dst, const void *__src, size_t __n)
+
+__inline__ void mmp_init(mmp_ctrl_t *msg_ctrl,  uint8_t *buf, uint8_t buf_size,  void (*user_handler)(void *user_data, mmp_msg_t *msg), void *user_data)
 {
-    BOOT_FN_CALL(BOOT_FADDR_EEPROM_READ_BLOCK, "(__dst, __src, __n)")
+    ((PF_VOID)((BOOT_FTAB_START + BOOT_FADDR_MMP_INIT)/2))(msg_ctrl, buf, buf_size, user_handler);
 }
 
-__inline__ void bu_eeprom_update_block (const void *__src, void *__dst, size_t __n)
+__inline__ void mmp_rx_ch(mmp_ctrl_t *mmp_ctrl, uint8_t ch)
 {
-    BOOT_FN_CALL(BOOT_FADDR_EEPROM_UPDATE_BLOCK, "(__dst, __src, __n)")
+    ((PF_VOID)((BOOT_FTAB_START + BOOT_FADDR_MMP_RX_CH)/2))(mmp_ctrl, ch);
 }
 
-__inline__ void msg_init(msg_ctrl_t *msg_ctrl, uint8_t *buf, uint8_t buf_size, void (*handler)(msg_t *msg))
+__inline__ void mmp_send(uint8_t *msg_data, uint8_t len, uint8_t flags, void (*tx_byte_fn)(const char c))
 {
-    BOOT_FN_CALL(BOOT_FADDR_MSG_INIT, "(msg_ctrl, buf, buf_size, handler)");
+    ((PF_VOID)((BOOT_FTAB_START + BOOT_FADDR_MMP_SEND)/2))(msg_data, len, flags, tx_byte_fn);
 }
 
-__inline__ void msg_rx_byte(msg_ctrl_t *msg_ctrl, uint8_t byte)
+__inline__ void mmp_tick(mmp_ctrl_t *mmp_ctrl)
 {
-    BOOT_FN_CALL(BOOT_FADDR_MSG_RX_BYTE, "(msg_ctrl, byte)");
-}
-
-__inline__ void msg_send(uint8_t *msg_data, uint8_t len, void (*tx_byte_fn)(const char b))
-{
-    BOOT_FN_CALL(BOOT_FADDR_MSG_SEND, "(msg_data,len,tx_byte_fn)");
-}
-
-__inline__ void msg_tick(msg_ctrl_t *msg_ctrl)
-{
-    BOOT_FN_CALL(BOOT_FADDR_MSG_TICK, "(msg_ctrl)");
+    ((PF_VOID)((BOOT_FTAB_START + BOOT_FADDR_MMP_TICK)/2))(mmp_ctrl);
 }
