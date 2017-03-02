@@ -1,5 +1,10 @@
 // -----------------------------------------------------------------------------
 // Copyright Stephen Stebbing 2017. http://telecnatron.com/
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+//
 // -----------------------------------------------------------------------------
 #include "mmp.h"
 #include "lib/wdt.h"
@@ -21,6 +26,12 @@ void *mmp_handler_CS(mmp_msg_ctrl_t *msg,  uint8_t byte);
 #define MMP_TIMER_STOP() msg->timer=0
 #define MSG_CS(sum)    (uint8_t)(256-sum)
 
+// -----------------------------------------------------------------------------------
+#ifdef BOOT_APP
+// We are running as an application that calls into the bootloaders code for uart functions.
+// Functions are defined in ../boot/boot_functions.c and not here.
+// -----------------------------------------------------------------------------------
+#else
 
 // define MSG_USE_LOGGER to have error messages logged
 #ifdef MMP_LOGGING
@@ -207,3 +218,4 @@ void mmp_send(uint8_t *msg_data, uint8_t len, uint8_t flags, void (*tx_byte_fn)(
     // send checksum
     tx_byte_fn(MSG_CS( cs));
 }
+#endif //ifdef BOOT_APP

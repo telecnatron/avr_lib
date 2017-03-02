@@ -2,19 +2,22 @@
 #define _MMP_H 1
 // -----------------------------------------------------------------------------
 // Copyright Stephen Stebbing 2017. http://telecnatron.com/
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+//
 // -----------------------------------------------------------------------------
 /**
  * @file   mmp.h
  * @author steves
  * @date   2017/02/18 01:54:54
  * 
- * @brief  
+ * @brief  Microcontroller (very simple) Messaging Protocol.
  * 
  */
 #include "config.h"
 #include <stdint.h>
-
-// 
 
 
 #ifndef MMP_DEFS
@@ -25,12 +28,12 @@
 #undef MMP_NO_REBOOT
 #endif
 
-// Message indicator characters:
-// start of message
+//! Message indicator characters:
+//! start of message
 #define MSG_SOM '\1'
-// start of text
+//! start of text
 #define MSG_STX '\2'
-// end of text
+//! end of text
 #define MSG_ETX '\3'
 
 //! buffer for holding the message data
@@ -44,7 +47,7 @@ typedef struct mmp_msg_t {
 } mmp_msg_t;
 
 typedef struct mmp_msg_ctrl_t {
-   //! 
+   //! the message that is being received, or has been received, or sometimes the message that is to be sent.
     mmp_msg_t msg;
     //! maximum length of buffer that data points to
     uint8_t data_max_len;
@@ -84,13 +87,18 @@ typedef struct {
 void mmp_init(mmp_ctrl_t *msg_ctrl,  uint8_t *buf, uint8_t buf_size,  void (*user_handler)(void *user_data, mmp_msg_t *msg), void *user_data);
 
 
+/** 
+ * Should be called periodically so message reception timeouts can be detected.
+ * Default implementation calls this at about 1000Hz
+ * @param mmp_ctrl Pointer to the mmp_ctrl_t structure.
+ */
 void mmp_tick(mmp_ctrl_t *mmp_ctrl);
 
 /** 
+ * Called to pass a character (byte) that has been received on the communication channel onto the mmp system.
  * 
- * 
- * @param msg_ctrl 
- * @param ch
+ * @param msg_ctrl Pointer to the mmp_ctrl_t structure.
+ * @param ch The character (byte) that has been received.
  */
 void mmp_rx_ch(mmp_ctrl_t *mmp_ctrl, uint8_t ch);
 

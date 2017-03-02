@@ -1,13 +1,17 @@
 // -----------------------------------------------------------------------------
 // Copyright Stephen Stebbing 2015. http://telecnatron.com/
-// $Id: globals.h 403 2015-12-27 03:11:36Z steves $
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+//
 // -----------------------------------------------------------------------------
 /**
  * @file   globals.h
  * @author Stephen Stebbing <steves@slap.ss.com>
  * @date   Mon Dec 21 14:23:07 2015
  * 
- * @brief  Globals shared between bootloader and app are placed here, at the
+ * @brief  Global variables that are shared between bootloader and app are placed here, at the
  * start of the MCU's data space. 
  * 
  * Start of ram is 0x100, note AVR internal start of ram has 0x800000
@@ -15,8 +19,10 @@
  * so here we use 0x100
  *
  * In Makefile, we move the .data segment up so gcc puts its variables
- * above the ones defined here, 
- * eg To reserved 11 (0xb) bytes, use link flag:
+ * above the ones defined here, by doing this in both the bootloader and
+ * the application, the variables are common to both.
+ * 
+ * eg To reserve 11 (0xb) bytes for the global variables, use link flag:
  * 
  *    <CODE>LDFLAGS += -Wl,-section-start=.data=0x80010B</CODE>
  * 

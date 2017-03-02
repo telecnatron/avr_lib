@@ -1,8 +1,12 @@
 #ifndef DHT11_H
 #define DHT11_H
 // -----------------------------------------------------------------------------
-// Copyright Stebbing Computing. 2013.
-// $Id: dht11.h 120 2014-09-02 07:53:21Z steves $
+// Copyright Stephen Stebbing Computing 2014. http://telecnatron.com/
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+//
 // Interface to dht11 humidity and temperature sensor
 //
 // Device has 4 pins.

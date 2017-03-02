@@ -2,8 +2,11 @@
 #define UART_H
 // -----------------------------------------------------------------------------
 // Copyright Stephen Stebbing 2015. http://telecnatron.com/
-// $Id: uart.h 403 2015-12-27 03:11:36Z steves $
-//  
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+//
 // -----------------------------------------------------------------------------
 /**
  * @file   uart.h
@@ -95,13 +98,13 @@ typedef struct {
 //! Transmit passed progmem string
 #define PUTS_P(sp) uart_puts_P(sp)
 
-//! Pop char from rx circular buffer
+//! Pop received char from rx circular buffer
 #define GETC() uart_getc()
 //! Non zero if a rx char is availabe in the buffer
 #define UART_CHAR_AVAIL() (UART.rxbuf_count) 
 #define GETC_AVAIL() UART_CHAR_AVAIL()
 
-//! Discard any character that are in the rx circular buffer
+//! Discard any received character that are in the rx circular buffer
 #define UART_FLUSH() (UART.rxbuf_head = UART.rxbuf_tail = UART.rxbuf_count = 0)
 
 //! set baud rate - BAUD mast be defined. eg \#define BAUD=9600, or -D BAUD=9600 in Makefile,
@@ -111,8 +114,8 @@ void uart_set_baud();
 /** 
  * Initialise the uart. 
  * Sets baud, frame, initilises rx circular buffer, enables uart, enables RX ISR
- * @param buf      Pointer to char array that will be used for rx circular buffer
- * @param buf_size Number of bytes in the rx buffer
+ * @param buf      Pointer to char array that will be used for rx circular buffer data
+ * @param buf_size Number of bytes (max) in the rx buffer
  */
 void uart_init(char* buf, uint8_t buf_size);
 

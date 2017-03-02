@@ -1,6 +1,10 @@
 // -----------------------------------------------------------------------------
-// Copyright Stephen Stebbing 2015. http://telecnatron.com/
-// $Id: boot.c 403 2015-12-27 03:11:36Z steves $
+// Copyright Stephen Stebbing 2017. http://telecnatron.com/
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+//
 // -----------------------------------------------------------------------------
 #include "boot.h"
 #include <inttypes.h>
@@ -8,6 +12,11 @@
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 
+/** 
+ * Erase the flash page at the passed page address.
+ * 
+ * @param page The page number of the flash page that is to be erased.
+ */
 void boot_erase_page(uint32_t page)
 {
     // Save state and disable interrupts.
@@ -26,6 +35,14 @@ void boot_erase_page(uint32_t page)
     SREG = sreg;
 }
 
+/** 
+ * Write data to flash, erase previous contents first.
+ * 
+ * @param page The number of the page that is to be written to
+ * @param buf Pointer to the data that is to be written
+ * 
+ * @return 1
+ */
 uint8_t boot_write_page(uint32_t page, uint8_t *buf)
 {
     uint16_t i;

@@ -2,7 +2,12 @@
 #define ATT13_T0_H
 // -----------------------------------------------------------------------------
 // Copyright Stebbing Computing. 2013.
-// $Id: att13_t0.h 427 2016-04-07 04:21:09Z steves $
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+//
+//
 // Control of attiny timer 0.
 // -----------------------------------------------------------------------------
 // compare output modes
