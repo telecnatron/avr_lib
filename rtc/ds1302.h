@@ -2,7 +2,12 @@
 #define DS1302_H
 // -----------------------------------------------------------------------------
 // Copyright Stebbing Computing. 2013.
-// $Id: ds1302.h 114 2014-09-01 10:04:55Z steves $
+// 
+// ds1302 rtc routines.
+//
+// Note: internally ds1302 reads and writes year, seconds, etc values as BCD. Here
+// BCD values are refered to as 'raw' data. Routines are provided to convert BCD to
+// and from integer (uint8_t in fact).
 // -----------------------------------------------------------------------------
 #include <avr/io.h>
 #include "../rtc.h"

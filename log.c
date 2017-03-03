@@ -55,7 +55,7 @@ static void log_start(uint8_t level)
 {
     char dts[LOG_DATE_STR_MAX];
     log_get_date_cb(dts, LOG_DATE_STR_MAX - 1);
-    printf_P(PSTR("\tLOG: %s-"),dts );
+    printf_P(PSTR("\tLOG:%s:"),dts );
     switch(level){
 	case 0: putss_P((char *)log_level_debug);break;
 	case 1: putss_P((char *)log_level_info);break;
