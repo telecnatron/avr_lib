@@ -31,7 +31,7 @@ uint8_t dht11_read(dht11_data_t *reading)
 
     // set data line for output
     DHT11_DATA_OUT();
-    // driver data lo for 20ms
+    // drive data lo for 20ms
     DHT11_DATA_LO();
     _delay_ms(20);
     DHT11_DATA_HI();

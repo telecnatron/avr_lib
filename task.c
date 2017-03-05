@@ -138,6 +138,8 @@ void task_num_ready(uint8_t task_num, uint8_t ready)
 	TASK_UNREADY(task);
 	TASK_LOG_DEBUG("%s:%u: unready %u",__FILE__,__LINE__,task_ctrl.tick_count, task_num);
     }
+    // figure out next alarm to expire
+    task_set_tick_wake();
 }
 
 void task_ready(uint8_t ready)
@@ -162,7 +164,7 @@ void task_num_set_tick_timer(uint8_t task_num, uint16_t ticks)
 
 }
 
-void task_set_tick_timer(uint16_t ticks)
+inline void task_set_tick_timer(uint16_t ticks)
 {
     task_num_set_tick_timer(task_ctrl.task_num, ticks);
 }
