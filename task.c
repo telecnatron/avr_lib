@@ -24,7 +24,7 @@ typedef struct {
     // tick number at which task will be made runnable
     uint16_t tick_alarm;
     // second number at which task will be made runnable
-    uint16_t seconds_alarm;
+    uint32_t seconds_alarm;
     // user data gets passed to task function when it is called.
     void *user_data;
 } task_t;
@@ -38,7 +38,7 @@ typedef struct {
     // current tick
     uint16_t tick_count;
     // current second
-    uint16_t seconds_count;
+    uint32_t seconds_count;
     // tick at which next task alarm will expire
     uint16_t tick_wake;
     // number of tasks that are waiting on a tick alarm

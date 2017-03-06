@@ -10,17 +10,22 @@
  * Note: interrupts are potentially disabled while bus transactions are occuring. This may
  * be for a period of 1ms or more.
  *
+ * Note: current implements allows for only one slave device on the bus.
+ *
+ * See http://www.atmel.com/images/doc2579.pdf
  */
 #include "config.h"
 #include <avr/io.h>
 
 // io pins
 #ifndef ONEWIRE_DEFS
+#define ONEWIRE_DEFS
 #warning "onewire.h is using default HW definitions"
-#define ONEWIRE_PORT PORTD
-#define ONEWIRE_PORT_IN  PIND
-#define ONEWIRE_DDR  DDRD
-#define ONEWIRE_DATA_PIN  PIN7
+#define ONEWIRE_PORT PORTC
+#define ONEWIRE_PORT_IN  PINC
+#define ONEWIRE_DDR  DDRC
+#define ONEWIRE_DATA_PIN  PIN1
+#undef  ONEWIRE_USE_INTERNAL_PULLUP
 #endif //ifndef ONEWIRE_DEFS
 
 // rom commands
@@ -30,6 +35,7 @@
 #define     ONEWIRE_ROM_SEARCH  0xf0    //!< SEARCH ROM command code.
 
 // function declarations
+//!
 void onewire_init();
 //! returns true if one or more devices on the bus indicate as being present.
 uint8_t onewire_detect_presence();

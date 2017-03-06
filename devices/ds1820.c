@@ -8,12 +8,7 @@
 // -----------------------------------------------------------------------------
 #include "ds1820.h"
 //#include "onewire.h"
-#include "./lib/log.h"
 
-// last read temperature - in 16ths of a degree C
-volatile int16_t ds1820_temperature_raw;
-// last read temperature as float
-volatile float   ds1820_temperature;
 
 // memory commands
 #define DS1820_START_CONVERSION 0x44
@@ -22,6 +17,18 @@ volatile float   ds1820_temperature;
 #define DS1820_COPY_SCRATCH     0x48
 #define DS1820_RECALL           0xb8
 #define DS1820_READ_POWER       0xb4
+
+#ifdef DS1820_LOGGING
+#include "lib/log.h"
+#define DS1820_LOG(fmt, msg...) LOG_INFO_FP(fmt, msg)
+#define DS1820_LOG_ERROR(fmt, msg...) LOG_INFO_FP(fmt, msg)
+#define DS1820_LOG_DEBUG(fmt, msg...) LOG_DEBUG_FP(fmt, msg)
+#else
+#define DS1820_LOG(fmt, msg...)
+#define DS1820_LOG_DEBUG(fmt, msg...)
+#define DS1820_LOG_ERROR(fmt, msg...)
+#endif
+
 
 
 inline float ds1820_to_float(int16_t temp)
@@ -44,23 +51,23 @@ uint8_t ds1820_verify_scratchpad_crc()
 }
 
 
-
 uint8_t ds1820_init()
 {
     onewire_init();
     return onewire_detect_presence();
 }
 
-uint8_t ds1820_convert_and_read_temperature()
+uint8_t ds1820_convert_and_read_temperature(float *temp)
 {
-    if(!ds1820_start_conversion()){
+    if(ds1820_start_conversion()){
 	return 1;
     }
-    // wait for conversion to complete - ds1820 holds bus low while conversion in progress
+    // wait for conversion to complete - ds1820 holds bus low while conversion in progress,
+    // this should be ~1ms
     while(!onewire_read_bit()){}
     // read temp from device
-    if(ds1820_read_temperature()){
-	return 1;
+    if(ds1820_read_temperature(temp)){
+	return 2;
     }
     return 0;
 }
@@ -76,8 +83,10 @@ uint8_t ds1820_start_conversion()
     return 0;
 }
 
-uint8_t ds1820_read_temperature()
+uint8_t ds1820_read_temperature(float *temp)
 {
+    int16_t temp_raw;
+
     // read temperate from the scratch pad
     //  reset, presence
     if(!onewire_detect_presence()){
@@ -85,16 +94,14 @@ uint8_t ds1820_read_temperature()
     }
     // read result
     onewire_skip_rom();
-
     onewire_send_byte(DS1820_READ_SCRATCH);
     // lsb
-    ds1820_temperature_raw = onewire_receive_byte();
+    temp_raw = onewire_receive_byte();
     // msb
-    ds1820_temperature_raw |= (onewire_receive_byte() << 8);
-
+    temp_raw |= (onewire_receive_byte() << 8);
     // convert to float
-    ds1820_temperature=DS1820_RAW_TO_FLOAT(ds1820_temperature_raw);
-    // done - we only read the first two bytes from scratchpad - that's all we need here
+    *temp=DS1820_RAW_TO_FLOAT(temp_raw);
+    // done - note that we only read the first two bytes from scratchpad - that's all we need here
     return 0;
 }
 

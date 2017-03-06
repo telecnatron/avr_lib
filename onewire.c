@@ -1,25 +1,34 @@
 // -----------------------------------------------------------------------------
-// Copyright Stebbing Computing. 2013.
-// $Id: $
+// Copyright Stephen Stebbing. 2013.
 // -----------------------------------------------------------------------------
 #include <avr/interrupt.h>
+#include <util/atomic.h>
 #include <util/delay.h>
 #include "onewire.h"
+#include "./lib/log.h"
 
-// XXX debug
-//#include <stdio.h>
 
-// set pin to input. No internal pullup enabled
-#define ONEWIRE_RELEASE_BUS() ONEWIRE_DDR &=~ _BV(ONEWIRE_DATA_PIN); ONEWIRE_PORT &=~ _BV(ONEWIRE_DATA_PIN)
+#ifdef ONEWIRE_USE_INTERNAL_PULLUP
+// XXX use avr's internal pullup to pullup the 1-wire bus. Quite possibily THIS DOES NOT WORK.
 // set pin to input. Internal pullup enabled
-//#define ONEWIRE_RELEASE_BUS() ONEWIRE_DDR &=~ _BV(ONEWIRE_DATA_PIN); ONEWIRE_PORT |= _BV(ONEWIRE_DATA_PIN)
+#define ONEWIRE_RELEASE_BUS() ONEWIRE_DDR &=~ _BV(ONEWIRE_DATA_PIN); ONEWIRE_PORT |= _BV(ONEWIRE_DATA_PIN)
+#warning "Using internal pullup on 1-wire bus. XXX PLEASE CONFIRM THAT THIS ACTUALLY WORKS XXX."
+#else
+// set pin to input. No internal pullup enabled, external 4k7 resistor required to pull the bus data line to Vcc.
+#define ONEWIRE_RELEASE_BUS() ONEWIRE_DDR &=~ _BV(ONEWIRE_DATA_PIN); ONEWIRE_PORT &=~ _BV(ONEWIRE_DATA_PIN)
+#endif
 
 // set pin to output, pull bus (data pin) low
 #define ONEWIRE_SET_LO()      ONEWIRE_DDR |= _BV(ONEWIRE_DATA_PIN);  ONEWIRE_PORT &=~ _BV(ONEWIRE_DATA_PIN)
 
-// macros to disable/save and reenable interrupts
-#define ONEWIRE_INTERRUPTS_DISABLE() onewire_interrupts_off()
-#define ONEWIRE_INTERRUPTS_ENABLE()  onewire_interrupts_on()
+
+#ifdef ONEWIRE_LOGGING
+#define ONEWIRE_LOG(fmt, msg...) LOG_INFO_FP(fmt, msg)
+#define ONEWIRE_LOG_DEBUG(fmt, msg...) LOG_DEBUG_FP(fmt, msg)
+#else
+#define ONEWIRE_LOG(fmt, msg...)
+#define ONEWIRE_LOG_DEBUG(fmt, msg...)
+#endif
 
 // timings in microseconds
 #define ONEWIRE_DELAY_TIME_SLOT 60
@@ -37,19 +46,6 @@
 // function declarations
 static void onewire_write0();
 static void onewire_write1();
-
-static void onewire_interrupts_on()
-{
-    sei();
-}
-
-static void onewire_interrupts_off()
-{ 
-    cli();
-}
-
-
-
 
 void onewire_skip_rom()
 {
@@ -106,21 +102,19 @@ uint8_t onewire_detect_presence()
 {
     uint8_t presenceDetected=0;
 
-    ONEWIRE_INTERRUPTS_DISABLE();
-    // set low and delay
-
-    ONEWIRE_SET_LO();
-    _delay_us(ONEWIRE_DELAY_H); // 480us
-    // release and delay
-    ONEWIRE_RELEASE_BUS();
-    _delay_us(ONEWIRE_DELAY_I); // 70 us
-    // sample bus to detect presence and delay - a present device will hold bus low
-    presenceDetected = ~(ONEWIRE_PORT_IN & _BV(ONEWIRE_DATA_PIN));
-    // XXX
-    _delay_us(ONEWIRE_DELAY_J);
-
-    ONEWIRE_INTERRUPTS_ENABLE();
-//    printf("port: %01x, pd: %01x, bv: %01x pin: %01x\n",ONEWIRE_PORT_IN, presenceDetected),_BV(ONEWIRE_DATA_PIN), ONEWIRE_DATA_PIN;
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+	// set low and delay
+	ONEWIRE_SET_LO();
+	_delay_us(ONEWIRE_DELAY_H); // 480us
+	// release and delay
+	ONEWIRE_RELEASE_BUS();
+	_delay_us(ONEWIRE_DELAY_I); // 70 us
+	// sample bus to detect presence and delay - a present device will hold bus low
+	presenceDetected = ~(ONEWIRE_PORT_IN & _BV(ONEWIRE_DATA_PIN));
+	// XXX
+	_delay_us(ONEWIRE_DELAY_J);
+    }
+    ONEWIRE_LOG_DEBUG("onewire_detect_presence() return value: %i", presenceDetected);
     return presenceDetected ;
 }
 
@@ -130,50 +124,44 @@ void onewire_init()
     // The first rising edge can be interpreted by a slave as the end of a
     // Reset pulse. Delay for the required reset recovery time (H) to be 
     // sure that the real reset is interpreted correctly.
-    _delay_us(ONEWIRE_DELAY_H);
+    _delay_us(ONEWIRE_DELAY_H); // 480us
 }
 
 static void onewire_write0()
 {
-    ONEWIRE_INTERRUPTS_DISABLE();
-
-    ONEWIRE_SET_LO();
-    _delay_us(ONEWIRE_DELAY_C);
-    ONEWIRE_RELEASE_BUS();
-    _delay_us(ONEWIRE_DELAY_D);
-
-    ONEWIRE_INTERRUPTS_ENABLE();
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+	ONEWIRE_SET_LO();
+	_delay_us(ONEWIRE_DELAY_C); // 60us
+	ONEWIRE_RELEASE_BUS();
+	_delay_us(ONEWIRE_DELAY_D); // 10us
+    }
 }
 
 static void onewire_write1()
 {
-    ONEWIRE_INTERRUPTS_DISABLE();
-
-    ONEWIRE_SET_LO();
-    _delay_us(ONEWIRE_DELAY_A);
-    ONEWIRE_RELEASE_BUS();
-    _delay_us(ONEWIRE_DELAY_B);
-
-    ONEWIRE_INTERRUPTS_ENABLE();
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+	ONEWIRE_SET_LO();
+	_delay_us(ONEWIRE_DELAY_A); // 6us
+	ONEWIRE_RELEASE_BUS();
+	_delay_us(ONEWIRE_DELAY_B); // 64us
+    }
 }
 
 uint8_t onewire_read_bit()
 {
     uint8_t bit=0;
     
-    ONEWIRE_INTERRUPTS_DISABLE();
-
-    // set lo and delay
-    ONEWIRE_SET_LO();
-    _delay_us(ONEWIRE_DELAY_A);
-    // release and delay
-    ONEWIRE_RELEASE_BUS();
-    _delay_us(ONEWIRE_DELAY_E);
-    // read bus and delay
-    bit=ONEWIRE_PORT_IN & _BV(ONEWIRE_DATA_PIN);
-    _delay_us(ONEWIRE_DELAY_F);
-
-    ONEWIRE_INTERRUPTS_ENABLE();
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+	// set lo and delay
+	ONEWIRE_SET_LO();
+	_delay_us(ONEWIRE_DELAY_A); // 6us
+	// release and delay
+	ONEWIRE_RELEASE_BUS();
+	_delay_us(ONEWIRE_DELAY_E); // 9us
+	// read bus and delay
+	bit=ONEWIRE_PORT_IN & _BV(ONEWIRE_DATA_PIN);
+	_delay_us(ONEWIRE_DELAY_F); // 55us
+    }
     if(bit)
 	return 1;
     else
