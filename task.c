@@ -10,7 +10,7 @@
 #include "lib/util/io.h"
 
 
-#ifdef TASK_LOG
+#ifdef TASK_LOGGING
 #include "lib/log.h"
 #define TASK_LOG_DEBUG(fmt, msg...) LOG_DEBUG_FP(fmt, msg)
 #else
@@ -66,7 +66,7 @@ static task_ctrl_t task_ctrl;
 #define TASK_SET_TICK_ALARM(task_p)    BIT_HI(task_p->flags, TASK_FLAGS_TICK_ALARM)
 #define TASK_UNSET_TICK_ALARM(task_p)  BIT_LO(task_p->flags, TASK_FLAGS_TICK_ALARM)
 
-#define TASK_IS_ALARM_SECONDS(task_p)  BIT_IS_SET(task_p->flags, TASK_FLAG_SECONDS_ALARM )
+#define TASK_IS_ALARM_SECONDS(task_p)  BIT_IS_SET(task_p->flags, TASK_FLAGS_SECONDS_ALARM )
 #define TASK_SET_SECONDS_ALARM(task_p)    BIT_HI(task_p->flags, TASK_FLAGS_SECONDS_ALARM)
 #define TASK_UNSET_SECONDS_ALARM(task_p)  BIT_LO(task_p->flags, TASK_FLAGS_SECONDS_ALARM)
 
@@ -130,7 +130,7 @@ void task_num_ready(uint8_t task_num, uint8_t ready)
 {
     task_t *task = &(task_ctrl.task_tab[task_num]);
     TASK_UNSET_SECONDS_ALARM(task);
-    TASK_UNSET_TICK_ALARM(task);
+    task_num_cancel_tick_timer(task_num);
     if (ready){
 	TASK_LOG_DEBUG("%s:%u: ready %u",__FILE__,__LINE__,task_ctrl.tick_count, task_num);
 	TASK_READY(task);
@@ -139,12 +139,27 @@ void task_num_ready(uint8_t task_num, uint8_t ready)
 	TASK_LOG_DEBUG("%s:%u: unready %u",__FILE__,__LINE__,task_ctrl.tick_count, task_num);
     }
     // figure out next alarm to expire
-    task_set_tick_wake();
+    // XXX this is done in task_num_cancel_tick_timer();
+//  task_set_tick_wake();
 }
 
 void task_ready(uint8_t ready)
 {
     task_num_ready(task_ctrl.task_num, ready);
+}
+
+void task_num_cancel_tick_timer(uint8_t task_num)
+{
+    task_t *task = &(task_ctrl.task_tab[task_num]);
+    if( TASK_IS_ALARM_TICK(task)){
+	// yup, alarm was set
+	TASK_UNSET_TICK_ALARM(task);
+	task_ctrl.task_alarm_count--;
+	TASK_LOG_DEBUG("%s:%u: cancelled tick timer: %u",__FILE__,__LINE__, task_num);
+	// figure out next alarm to expire
+	task_set_tick_wake();
+
+    }
 }
 
 void task_num_set_tick_timer(uint8_t task_num, uint16_t ticks)
@@ -226,8 +241,9 @@ void task_seconds_tick()
     task_t *task = task_ctrl.task_tab;
     // loop thru tasks
     for (uint8_t i=0; i < TASK_NUM_TASKS; i++, task++){
-	if(task->seconds_alarm == task_ctrl.seconds_count){
+	if(TASK_IS_ALARM_SECONDS(task) && task->seconds_alarm == task_ctrl.seconds_count){
 	    // make task ready to run
+	    TASK_LOG_DEBUG("%s:%u:%u ready on seconds alarm: %u",__FILE__,__LINE__,task_ctrl.tick_count, i );
 	    TASK_READY(task);
 	    TASK_UNSET_SECONDS_ALARM(task);
 	}
