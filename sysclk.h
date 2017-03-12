@@ -14,13 +14,15 @@
  * @date   2016/05/16 06:32:46
  * 
  * @brief  Timer that counts ticks and 'seconds'. Default setting is to use T2:
- * FCPU 16MHz, prescaller 1024, terminal count 15, for timer period of 1.024ms
- * which is counted as 1 'second'. 
+ * FCPU 16MHz, prescaller 64, terminal count 250, for timer period of 1ms.
  *
  * Uses TIMER2_COMPA_vect, ISR is defined in sysclk.c
- * 
- * To changed these settings edit the SYSCLK_xxx defines/macros.
- * 
+ *
+ * To use different timing paramters, change the SYSCLK_INIT_PRE(), SYSCLK_SET_TC() macros,
+ * and set SYSCLK_TICK_FREQ define accordingly.
+ *
+ * To use a different timer, change all the SYSCLK_XXX macros/defines accordingly, 
+ * eg replace T2_ with T0_, TIMER2 with TIMER0.
  */
 #include "./timer.h"
 #include "config.h"
