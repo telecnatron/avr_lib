@@ -6,6 +6,14 @@
 
 #include <util/delay.h>
 
+// define DS1302_LOGGING to have log messages displayed
+#ifdef DS1302_LOGGING
+#include "lib/log.h"
+#define DS1302_LOG(fmt, msg...) LOG_INFO_FP(fmt, msg)
+#else
+#define DS1302_LOG(fmt, msg...) 
+#endif
+
 // set clock line 
 #define DS1302_CLK_LO() DS1302_PORT &=~ _BV(DS1302_PIN_CLK)
 #define DS1302_CLK_HI()	DS1302_PORT |= _BV(DS1302_PIN_CLK)
@@ -75,6 +83,7 @@ static void ds1302_write_byte(uint8_t byte)
 	DS1302_DELAY();
 	DS1302_CLK_HI();
 	byte >>=1; // shift ready for next bit
+	DS1302_DELAY();
     }
     // end with CLK hi
 }
@@ -148,14 +157,26 @@ void ds1302_get_datetime_raw(rtc_datetime_t *dtp)
 
 void ds1302_set_datetime_raw(rtc_datetime_t *dtp)
 {
+
     uint8_t *b=(uint8_t *)dtp;
     // burst write 7 bytes
+#if 0
+    // XXX why doesn't this work?
     ds1302_reset();
     ds1302_write_byte(DS1302_CLK_BURST_WRITE);
     for(uint8_t i=0; i!=7; ++i){
 	ds1302_write_byte(*b++);
     }
     DS1302_CE_LO(); // complete transaction
+#else
+    // XXX we do it the slow way
+    uint8_t cmd=DS1302_WRITE_SECONDS;
+    for(uint8_t i=0; i!=7; i++){
+	ds1302_write(cmd, *b);
+	b++;
+	cmd+=2;
+    }
+#endif
 }
 
 uint8_t ds1302_tc(uint8_t cmd)

@@ -23,15 +23,6 @@
 // Convert temp as read from sensor (2's compiment signed) to float
 #define DS1820_RAW_TO_FLOAT(t) t/16.0;
 
-// Global variables
-//! error flag - set to one of the DS1820_ERROR_XXX defines
-extern uint8_t ds1820_error;
-
-//! last read temperature raw
-extern volatile int16_t ds1820_temperature_raw;
-//! last read temperature
-extern volatile float ds1820_temperature;
-
 // function declarations
 //! Detect a presence on the bus, return 0 (DS1820_ERROR_NONE) if presence detected, none_zero otherwise
 //! Sets ds1820_error variabl
@@ -44,12 +35,15 @@ float ds1820_to_float(int16_t temp);
 //! Signal the device to start convertion
 uint8_t ds1820_start_conversion();
 
-//! Start conversion, wait for completion, read result into ds1820_temperature variable.
+//! Start conversion, wait for completion, place result in *temp
+//! return 0 on success, non-zero on error
 //! XXX not sure if this actually works.
-uint8_t ds1820_convert_and_read_temperature();
+uint8_t ds1820_convert_and_read_temperature(float *temp);
 
-//! read result into ds1820_temperature variable.
-uint8_t ds1820_read_temperature();
+//! Read temperature info *temp, ds1820_start_conversion() should have been called and coversion completed (~1ms) prior to calling.
+//! return 0 on success, non-zero on error
+//! XXX not sure if this actually works.
+uint8_t ds1820_read_temperature(float *temp);
 
 //! Read the scratchpad and calculate the crc.
 // Return true if the calculated crc matches the crc stored in the scratchpad, false otherwise.

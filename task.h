@@ -48,6 +48,14 @@ void task_init(uint8_t task_num, void(*task_callback)(void *data), void *data, u
  */
 void task_num_set_tick_timer(uint8_t task_num, uint16_t ticks);
 
+
+/** 
+ * Cancel task's tick timer, if it was set.
+ * 
+ * @param task_num The number of the task for which the tick timer is to be cancelled.
+ */
+void task_num_cancel_tick_timer(uint8_t task_num);
+
 /** 
  * Put current task to sleep (ie make unrunnable) until the passed number of ticks has occured.
  * This function would normally only be called from within a task's callback function.

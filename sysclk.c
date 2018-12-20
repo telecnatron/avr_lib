@@ -12,7 +12,7 @@
 // tick count
 uint16_t sysclk_ticks;
 // seconds count
-uint16_t sysclk_seconds;
+uint32_t sysclk_seconds;
 // flag to indicated that clk has ticked since last call to sysclk_has_ticked()
 uint8_t sysclk_ticked;
 // flag to indicated that seconds haveticked since last call to sysclk_have_seconds_ticked()

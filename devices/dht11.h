@@ -27,6 +27,7 @@
 // -----------------------------------------------------------------------------
 #ifndef DHT11_PIN_DEFS
 #define DHT11_PIN_DEFS
+#warning "Using default defs"
 // device definitions. If these are overriden prior, be sure to defined DHT11_DEFS
 // device connected on PINC3, pin 26 on dip package
 #define DHT11_DDR       DDRC
@@ -38,7 +39,7 @@
 #ifndef DHT11_DEFS
 #define DHT11_DEFS
 // timer setup stuff
-// assumes F_CPU=16M, uses timer2 on atmega328, 168, 88, 8
+// assumes F_CPU=16M, uses timer0 on atmega328, 168, 88, 8
 #if F_CPU==16000000
 // timer current count register
 #define DHT11_TIMER_COUNT TCNT0
