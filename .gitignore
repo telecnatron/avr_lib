@@ -5,3 +5,4 @@
 *.map
 *.o
 doc/doxygen
+doc/html

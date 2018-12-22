@@ -1,8 +1,22 @@
 #ifndef DS1302_H
 #define DS1302_H
 // -----------------------------------------------------------------------------
-// Copyright Stebbing Computing. 2013.
-// 
+// Copyright 2018 Stephen Stebbing. telecnatron.com
+//
+//    Licensed under the Telecnatron License, Version 1.0 (the “License”);
+//    you may not use this file except in compliance with the License.
+//    You may obtain a copy of the License at
+//
+//        https://telecnatron.com/software/licenses/
+//
+//    Unless required by applicable law or agreed to in writing, software
+//    distributed under the License is distributed on an “AS IS” BASIS,
+//    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//    See the License for the specific language governing permissions and
+//    limitations under the License.
+// -----------------------------------------------------------------------------   
+
+// -----------------------------------------------------------------------------
 // ds1302 rtc routines.
 //
 // Note: internally ds1302 reads and writes year, seconds, etc values as BCD. Here
