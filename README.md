@@ -1,4 +1,4 @@
-AVR Lib Version 2.0
+AVR Lib Version 2.1
 ===================
 
 C library for AVR ATMEGAx8 and ATTiny processors. Note that some functions 
